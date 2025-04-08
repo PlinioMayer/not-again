@@ -18,7 +18,7 @@ axiosInstance.objetivos = {
             {
               documentId: "documentId",
               nome: "Nome",
-              inicio: "2025-04-08",
+              inicio: "2025-04-06",
               fim: "2025-04-08",
               createdAt: "2025-04-08",
               plinio: {

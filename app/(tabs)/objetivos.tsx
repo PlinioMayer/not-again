@@ -1,8 +1,12 @@
-import { ErrorComponent, LoadingComponent } from "@/components";
+import {
+  ErrorComponent,
+  LoadingComponent,
+  ObjetivoComponent,
+} from "@/components";
 import { Objetivo } from "@/types";
 import { axiosInstance } from "@/utils/axios.utils";
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { FlatList } from "react-native";
 
 const Objetivos = () => {
   const [objetivos, setObjetivos] = useState<Objetivo[] | undefined | null>();
@@ -28,15 +32,13 @@ const Objetivos = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-      }}
-    >
-      {objetivos.map((objetivo) => (
-        <Text key={objetivo.documentId}>{objetivo.nome}</Text>
-      ))}
-    </View>
+    <FlatList
+      data={objetivos}
+      renderItem={({ item }) => <ObjetivoComponent objetivo={item} />}
+      keyExtractor={(item) => item.documentId}
+      onRefresh={getObjetivos}
+      refreshing={objetivos === undefined}
+    />
   );
 };
 
