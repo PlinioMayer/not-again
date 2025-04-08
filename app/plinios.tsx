@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-export default function Plinios() {
+const Plinios = () => {
   return (
     <View
       style={{
@@ -12,4 +12,6 @@ export default function Plinios() {
       <Text>Plínios</Text>
     </View>
   );
-}
+};
+
+export default Plinios;
