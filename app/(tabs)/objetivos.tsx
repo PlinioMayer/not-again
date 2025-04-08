@@ -1,18 +1,16 @@
 import { ErrorComponent, LoadingComponent } from "@/components";
-import { useAxios } from "@/contexts";
 import { Objetivo } from "@/types";
+import { axiosInstance } from "@/utils/axios.utils";
 import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const Objetivos = () => {
-  const axios = useAxios();
   const [objetivos, setObjetivos] = useState<Objetivo[] | undefined | null>();
   const getObjetivos = useCallback((): void => {
-    axios.objetivos.get().then((objetivos) => {
-      console.log(objetivos);
+    axiosInstance.objetivos.get().then((objetivos) => {
       setObjetivos(objetivos);
     });
-  }, [axios, setObjetivos]);
+  }, [setObjetivos]);
 
   useEffect(getObjetivos, [getObjetivos]);
 
@@ -33,8 +31,6 @@ const Objetivos = () => {
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
       }}
     >
       {objetivos.map((objetivo) => (
