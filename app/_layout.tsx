@@ -1,18 +1,15 @@
 import { PaperProvider } from "react-native-paper";
 import { Stack } from "expo-router";
-import { SafeAreaView } from "react-native";
 
-export const RootLayout = () => {
+export const AppLayout = () => {
   return (
     <PaperProvider>
-      <SafeAreaView>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-      </SafeAreaView>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+      </Stack>
     </PaperProvider>
   );
 };
 
-export default RootLayout;
+export default AppLayout;
