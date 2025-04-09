@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, ViewStyle } from "react-native";
 
 const styles = StyleSheet.create({
