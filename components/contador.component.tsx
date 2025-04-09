@@ -46,7 +46,7 @@ export const ContadorComponent = ({
     ];
 
     for (let i = newList.length; i < 5; i++) {
-      newList.push(0);
+      newList.unshift(0);
     }
 
     setList(newList);
@@ -55,19 +55,19 @@ export const ContadorComponent = ({
   return (
     <View style={{ ...styles.main, ...style }}>
       <View style={styles.digito}>
-        <Text>{list[4]}</Text>
-      </View>
-      <View style={styles.digito}>
-        <Text>{list[3]}</Text>
-      </View>
-      <View style={styles.digito}>
-        <Text>{list[2]}</Text>
+        <Text>{list[0]}</Text>
       </View>
       <View style={styles.digito}>
         <Text>{list[1]}</Text>
       </View>
       <View style={styles.digito}>
-        <Text>{list[0]}</Text>
+        <Text>{list[2]}</Text>
+      </View>
+      <View style={styles.digito}>
+        <Text>{list[3]}</Text>
+      </View>
+      <View style={styles.digito}>
+        <Text>{list[4]}</Text>
       </View>
     </View>
   );

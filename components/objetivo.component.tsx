@@ -28,7 +28,7 @@ export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
           ...style,
           backgroundColor: MD3LightTheme.colors.elevation.level5,
         }}
-        size={30}
+        size={50}
         source={{ uri: url }}
       />
     )}

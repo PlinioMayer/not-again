@@ -1,9 +1,12 @@
-import { Objetivo } from "@/types";
+import { Objetivo, ObjetivoResponse } from "@/types";
 import axios, { AxiosInstance } from "axios";
 
 export type CustomAxiosInstance = AxiosInstance & {
   objetivos: {
     get: () => Promise<Objetivo[] | null>;
+  };
+  utils: {
+    today: () => Promise<string | null>;
   };
 };
 
@@ -12,47 +15,18 @@ export const axiosInstance = axios.create() as CustomAxiosInstance;
 axiosInstance.objetivos = {
   get: async (): Promise<Objetivo[] | null> => {
     try {
-      const objetivos = {
-        data: {
-          data: [
-            {
-              documentId: "documentId1",
-              nome: "Nome",
-              inicio: "2025-04-06",
-              fim: "2025-04-08",
-              createdAt: "2025-04-08",
-              plinio: {
-                nome: "Plínio",
-                conteudo: {
-                  url: "/assets/assets//images/react-logo.png",
-                },
-              },
-            },
-            {
-              documentId: "documentId2",
-              nome: "Nome",
-              inicio: "2025-04-06",
-              fim: "2025-04-08",
-              createdAt: "2025-04-08",
-              plinio: {
-                nome: "Plínio",
-                conteudo: {
-                  url: "/assets/assets//images/react-logo.png",
-                },
-              },
-            },
-          ],
+      const objetivos = await axiosInstance.get<ObjetivoResponse>(
+        process.env.EXPO_PUBLIC_CMS_HOST! + "/api/objetivos",
+        {
+          params: {
+            plinio: true,
+          },
+          headers: {
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_CMS_TOKEN}`,
+          },
         },
-      };
+      );
 
-      // await axiosInstance.get<ObjetivoResponse>(
-      //   process.env.EXPO_PUBLIC_CMS_HOST!,
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${process.env.EXPO_PUBLIC_CMS_TOKEN}`,
-      //     },
-      //   },
-      // );
       return objetivos.data.data.map((objetivo) => ({
         documentId: objetivo.documentId,
         nome: objetivo.nome,
@@ -61,11 +35,21 @@ axiosInstance.objetivos = {
         criadoEm: new Date(objetivo.createdAt),
         plinio: {
           nome: objetivo.plinio.nome,
-          url: process.env.EXPO_PUBLIC_CMS_HOST + objetivo.plinio.conteudo.url,
+          url:
+            process.env.EXPO_PUBLIC_CMS_HOST + objetivo.plinio.conteudo[0].url,
         },
       }));
     } catch {
       return null;
     }
+  },
+};
+
+axiosInstance.utils = {
+  today: (): Promise<string | null> => {
+    return axiosInstance
+      .get<string>(process.env.EXPO_PUBLIC_CMS_HOST! + "/api/utils/today")
+      .then((r) => r.data)
+      .catch(() => null);
   },
 };

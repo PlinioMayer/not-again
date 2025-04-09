@@ -25,6 +25,7 @@ const Objetivos = () => {
   const router = useRouter();
   const [objetivos, setObjetivos] = useState<Objetivo[] | undefined | null>();
   const getObjetivos = useCallback((): void => {
+    setObjetivos(undefined);
     axiosInstance.objetivos.get().then((objetivos) => {
       setObjetivos(objetivos);
     });
@@ -40,7 +41,7 @@ const Objetivos = () => {
     return (
       <ErrorComponent
         reload={getObjetivos}
-        message="Erro ao carregar objetivos"
+        message="Quais são meus objetivos???"
       />
     );
   }
@@ -52,7 +53,9 @@ const Objetivos = () => {
         renderItem={({ item }) => (
           <ObjetivoComponent
             onPress={() => {
-              router.push(`/objetivos/update?objetivo=${JSON.stringify(item)}`);
+              router.push(
+                `/objetivos/update?inicio=${item.inicio}&fim=${item.fim}&nome=${item.nome}`,
+              );
             }}
             objetivo={item}
           />
