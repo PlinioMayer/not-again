@@ -1,11 +1,14 @@
 import { Stack } from "expo-router";
 
 const ObjetivosLayout = () => (
-  <Stack screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="index" />
+  <Stack>
+    <Stack.Screen name="index" options={{ headerShown: false }} />
+    <Stack.Screen name="create" options={{ title: "Novo objetivo" }} />
     <Stack.Screen
-      name="create"
-      options={{ headerShown: true, title: "Novo objetivo" }}
+      name="update"
+      options={({ route }: { route: { params: { objetivo: string } } }) => ({
+        title: JSON.parse(route.params.objetivo).nome,
+      })}
     />
   </Stack>
 );

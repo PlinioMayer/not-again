@@ -5,10 +5,10 @@ import {
 } from "@/components";
 import { Objetivo } from "@/types";
 import { axiosInstance } from "@/utils/axios.utils";
-import { useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { FlatList, SafeAreaView, StyleSheet } from "react-native";
-import { AnimatedFAB, Divider } from "react-native-paper";
+import { AnimatedFAB } from "react-native-paper";
 
 const styles = StyleSheet.create({
   main: {
@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
 });
 
 const Objetivos = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const [objetivos, setObjetivos] = useState<Objetivo[] | undefined | null>();
   const getObjetivos = useCallback((): void => {
     axiosInstance.objetivos.get().then((objetivos) => {
@@ -49,7 +49,14 @@ const Objetivos = () => {
     <SafeAreaView style={styles.main}>
       <FlatList
         data={objetivos}
-        renderItem={({ item }) => <ObjetivoComponent objetivo={item} />}
+        renderItem={({ item }) => (
+          <ObjetivoComponent
+            onPress={() => {
+              router.push(`/objetivos/update?objetivo=${JSON.stringify(item)}`);
+            }}
+            objetivo={item}
+          />
+        )}
         keyExtractor={(item) => item.documentId}
         onRefresh={getObjetivos}
         refreshing={objetivos === undefined}
@@ -60,7 +67,7 @@ const Objetivos = () => {
         label="Label"
         extended={false}
         onPress={() => {
-          navigation.push("create");
+          router.push("/objetivos/create");
         }}
         visible={true}
       />

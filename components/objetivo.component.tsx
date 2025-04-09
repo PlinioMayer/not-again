@@ -5,6 +5,7 @@ import { Avatar, List, MD3LightTheme } from "react-native-paper";
 
 export type ObjetivoComponentProps = {
   objetivo: Objetivo;
+  onPress: () => void;
 };
 
 export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
@@ -14,11 +15,12 @@ export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
     fim,
     plinio: { url },
   },
+  onPress,
 }) => (
   <List.Item
     title={nome}
-    description={daysBetween(inicio, fim).toString()}
-    onPress={() => {}}
+    description={`${daysBetween(inicio, fim).toString()} dias`}
+    onPress={onPress}
     left={({ style, ...props }) => (
       <Avatar.Image
         {...props}
