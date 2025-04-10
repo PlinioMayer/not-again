@@ -1,4 +1,4 @@
-import { Plinio, PlinioResponse } from "./plinio";
+import { Plinio } from "./plinio";
 import { StrapiCollectionResponse } from "./strapi";
 
 export type ObjetivoForm = {
@@ -11,7 +11,13 @@ export type ObjetivoResponse = StrapiCollectionResponse<{
   inicio: string;
   fim: string;
   createdAt: string;
-  plinio: PlinioResponse;
+  plinio: {
+    documentId: string;
+    nome: string;
+    conteudo: {
+      url: string;
+    }[];
+  };
 }>;
 
 export type Objetivo = {

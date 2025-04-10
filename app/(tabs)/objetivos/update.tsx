@@ -3,6 +3,7 @@ import {
   ErrorComponent,
   LoadingComponent,
 } from "@/components";
+import { useObjetivos } from "@/contexts/objetivos.context";
 import { axiosInstance } from "@/utils";
 import { daysBetween } from "@/utils/date.utils";
 import { useLocalSearchParams } from "expo-router";
@@ -77,9 +78,10 @@ const getConteudo = (dias: number, theme: MD3Theme): ReactNode => {
 };
 
 const ObjetivosUpdate = () => {
+  const { objetivoId } = useLocalSearchParams();
+  const { getObjetivo, fetchObjetivos } = useObjetivos();
   const theme = useTheme();
-  const [today, setToday] = useState<string | undefined | null>();
-  const { inicio, fim } = useLocalSearchParams();
+  const [today, setToday] = useState<Date | undefined | null>();
   const getToday = useCallback(() => {
     axiosInstance.utils.today().then(setToday);
   }, [setToday]);
@@ -88,25 +90,29 @@ const ObjetivosUpdate = () => {
     getToday();
   }, [getToday]);
 
+  const objetivo = getObjetivo(objetivoId as string);
+
+  if (!objetivo) {
+    return (
+      <ErrorComponent
+        reload={fetchObjetivos}
+        message="Qual é o meu objetivo???"
+      />
+    );
+  }
+
   if (today === undefined) {
     return <LoadingComponent />;
   }
 
   if (today === null) {
     return (
-      <ErrorComponent reload={getToday} message="Não sei que dia é hoje" />
+      <ErrorComponent reload={getToday} message="Não sei que dia é hoje ;-;" />
     );
   }
 
-  const daysBetweenFimHoje = daysBetween(
-    new Date(fim as string),
-    new Date(today),
-  );
-
-  const daysBetweenInicioFim = daysBetween(
-    new Date(inicio as string),
-    new Date(fim as string),
-  );
+  const daysBetweenFimHoje = daysBetween(objetivo.fim, today);
+  const daysBetweenInicioFim = daysBetween(objetivo.inicio, objetivo.fim);
 
   if (today)
     return (

@@ -1,14 +1,8 @@
-import {
-  ErrorComponent,
-  LoadingComponent,
-  ObjetivoComponent,
-} from "@/components";
-import { Objetivo } from "@/types";
-import { axiosInstance } from "@/utils/axios.utils";
+import { ObjetivoComponent } from "@/components";
+import { useObjetivos } from "@/contexts/objetivos.context";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
 import { FlatList, SafeAreaView, StyleSheet } from "react-native";
-import { AnimatedFAB } from "react-native-paper";
+import { AnimatedFAB, Text } from "react-native-paper";
 
 const styles = StyleSheet.create({
   main: {
@@ -23,45 +17,27 @@ const styles = StyleSheet.create({
 
 const Objetivos = () => {
   const router = useRouter();
-  const [objetivos, setObjetivos] = useState<Objetivo[] | undefined | null>();
-  const getObjetivos = useCallback((): void => {
-    setObjetivos(undefined);
-    axiosInstance.objetivos.get().then((objetivos) => {
-      setObjetivos(objetivos);
-    });
-  }, [setObjetivos]);
-
-  useEffect(getObjetivos, [getObjetivos]);
-
-  if (objetivos === undefined) {
-    return <LoadingComponent />;
-  }
-
-  if (objetivos === null) {
-    return (
-      <ErrorComponent
-        reload={getObjetivos}
-        message="Quais são meus objetivos???"
-      />
-    );
-  }
+  const { objetivos, fetchObjetivos } = useObjetivos();
 
   return (
     <SafeAreaView style={styles.main}>
       <FlatList
         data={objetivos}
+        ListEmptyComponent={() => (
+          <Text variant="headlineMedium">
+            Adicione um objetivo para começar
+          </Text>
+        )}
         renderItem={({ item }) => (
           <ObjetivoComponent
             onPress={() => {
-              router.push(
-                `/objetivos/update?inicio=${item.inicio}&fim=${item.fim}&nome=${item.nome}`,
-              );
+              router.push(`/objetivos/update?objetivoId=${item.documentId}`);
             }}
             objetivo={item}
           />
         )}
         keyExtractor={(item) => item.documentId}
-        onRefresh={getObjetivos}
+        onRefresh={fetchObjetivos}
         refreshing={objetivos === undefined}
       />
       <AnimatedFAB

@@ -1,12 +1,15 @@
-import { Objetivo, ObjetivoResponse } from "@/types";
+import { Objetivo, ObjetivoResponse, Plinio, PlinioResponse } from "@/types";
 import axios, { AxiosInstance } from "axios";
 
 export type CustomAxiosInstance = AxiosInstance & {
   objetivos: {
     get: () => Promise<Objetivo[] | null>;
   };
+  plinios: {
+    get: () => Promise<Plinio[] | null>;
+  };
   utils: {
-    today: () => Promise<string | null>;
+    today: () => Promise<Date | null>;
   };
 };
 
@@ -34,6 +37,7 @@ axiosInstance.objetivos = {
         fim: new Date(objetivo.fim),
         criadoEm: new Date(objetivo.createdAt),
         plinio: {
+          documentId: objetivo.plinio.documentId,
           nome: objetivo.plinio.nome,
           url:
             process.env.EXPO_PUBLIC_CMS_HOST + objetivo.plinio.conteudo[0].url,
@@ -45,11 +49,35 @@ axiosInstance.objetivos = {
   },
 };
 
+axiosInstance.plinios = {
+  get: async (): Promise<Plinio[] | null> => {
+    try {
+      const plinios = await axiosInstance.get<PlinioResponse>(
+        process.env.EXPO_PUBLIC_CMS_HOST! + "/api/plinios",
+        {
+          params: {
+            byObjetivo: true,
+            sort: "dias:desc",
+          },
+        },
+      );
+
+      return plinios.data.data.map((plinio) => ({
+        documentId: plinio.documentId,
+        nome: plinio.nome,
+        url: process.env.EXPO_PUBLIC_CMS_HOST + plinio.conteudo[0].url,
+      }));
+    } catch {
+      return null;
+    }
+  },
+};
+
 axiosInstance.utils = {
-  today: (): Promise<string | null> => {
+  today: (): Promise<Date | null> => {
     return axiosInstance
       .get<string>(process.env.EXPO_PUBLIC_CMS_HOST! + "/api/utils/today")
-      .then((r) => r.data)
+      .then((r) => new Date(r.data))
       .catch(() => null);
   },
 };
