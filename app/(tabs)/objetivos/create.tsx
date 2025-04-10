@@ -4,7 +4,6 @@ import { Controller, useForm } from "react-hook-form";
 import { ObjetivoForm } from "@/types";
 import { LoadingComponent, SpacerComponent } from "@/components";
 import { useCallback, useState } from "react";
-import { axiosInstance } from "@/utils";
 import { useError } from "@/contexts/error.context";
 import { router } from "expo-router";
 import { useObjetivos } from "@/contexts";
@@ -20,7 +19,7 @@ const styles = StyleSheet.create({
 });
 
 const ObjetivosCreate = () => {
-  const { fetch } = useObjetivos();
+  const { create } = useObjetivos();
   const { setError } = useError();
   const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
@@ -36,24 +35,18 @@ const ObjetivosCreate = () => {
   });
 
   const onSubmit = useCallback(
-    async (data: ObjetivoForm) => {
+    async ({ nome }: ObjetivoForm) => {
       setLoading(true);
-      const res = await axiosInstance.objetivos.create({
-        nome: data.nome,
-        inicio: new Date(),
-        fim: new Date(),
-      });
 
-      if (!res) {
+      if (!create(nome)) {
         setError("Erro ao criar objetivo.");
         setLoading(false);
       } else {
-        await fetch();
         setLoading(false);
         router.back();
       }
     },
-    [setLoading, setError, fetch],
+    [setLoading, setError, create],
   );
 
   if (loading) {

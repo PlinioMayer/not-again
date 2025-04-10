@@ -13,6 +13,7 @@ export const ObjetivosContext = createContext<{
   objetivos?: Objetivo[] | null;
   get: (id: string) => Objetivo | undefined;
   fetch: () => Promise<void>;
+  create: (nome: string) => Promise<boolean>;
   update: (id: string, data: Partial<Objetivo>) => Promise<boolean>;
   delette: (id: string) => Promise<boolean>;
 }>({
@@ -21,6 +22,9 @@ export const ObjetivosContext = createContext<{
   },
   fetch: () => {
     throw new Error("ObjetivosContext.fetch não inicializado");
+  },
+  create: () => {
+    throw new Error("ObjetivosContext.create não inicializado");
   },
   update: () => {
     throw new Error("ObjetivosContext.update não inicializado");
@@ -49,58 +53,51 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
     [objetivos],
   );
 
-  const update = useCallback(
-    async (id: string, data: Partial<Objetivo>): Promise<boolean> => {
-      if (!objetivos) {
-        throw new Error("Objetivos não inicializados");
-      }
+  const create = useCallback(
+    async (nome: string): Promise<boolean> => {
+      const res = await axiosInstance.objetivos.create({
+        nome: nome,
+        inicio: new Date(),
+        fim: new Date(),
+      });
 
-      if (!(await axiosInstance.objetivos.update(id, data))) {
+      if (!res) {
         return false;
       }
 
-      const objetivo = get(id);
+      await fetch();
+      return true;
+    },
+    [fetch],
+  );
 
-      if (!objetivo) {
-        throw new Error(`Objetivo com id ${id} não encontrado`);
+  const update = useCallback(
+    async (id: string, data: Partial<Objetivo>): Promise<boolean> => {
+      const res = await axiosInstance.objetivos.update(id, data);
+
+      if (!res) {
+        return false;
       }
 
-      for (const key in data) {
-        (objetivo as Record<string, unknown>)[key] = (
-          data as Record<string, unknown>
-        )[key];
-      }
-
-      setObjetivos([...objetivos]);
+      await fetch();
 
       return true;
     },
-    [objetivos, get],
+    [fetch],
   );
 
   const delette = useCallback(
     async (id: string): Promise<boolean> => {
-      if (!objetivos) {
-        throw new Error("Objetivos não inicializados");
-      }
+      const res = await axiosInstance.objetivos.delete(id);
 
-      if (!(await axiosInstance.objetivos.delete(id))) {
+      if (!res) {
         return false;
       }
 
-      const index = objetivos.findIndex(
-        (objetivo) => objetivo.documentId === id,
-      );
-
-      if (index < 0) {
-        throw new Error(`Objetivo com id ${id} não encontrado`);
-      }
-
-      objetivos.splice(index, 1);
-      setObjetivos([...objetivos]);
+      await fetch();
       return true;
     },
-    [objetivos],
+    [fetch],
   );
 
   useEffect(() => {
@@ -109,7 +106,7 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ObjetivosContext.Provider
-      value={{ objetivos, fetch, update, get, delette }}
+      value={{ objetivos, fetch, create, update, get, delette }}
     >
       {children}
     </ObjetivosContext.Provider>
