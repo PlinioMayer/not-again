@@ -1,15 +1,11 @@
-import {
-  ContadorComponent,
-  ErrorComponent,
-  LoadingComponent,
-} from "@/components";
+import { ContadorComponent, ErrorComponent } from "@/components";
+import { useDate } from "@/contexts";
 import { useObjetivos } from "@/contexts/objetivos.context";
-import { axiosInstance } from "@/utils";
+import { Objetivo } from "@/types";
 import { daysBetween } from "@/utils/date.utils";
 import { useLocalSearchParams } from "expo-router";
-import { ReactNode, useCallback, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
-import { Button, MD3Theme, Text, useTheme } from "react-native-paper";
+import { Button, Text, useTheme } from "react-native-paper";
 
 const styles = StyleSheet.create({
   main: {
@@ -36,7 +32,11 @@ const styles = StyleSheet.create({
   },
 });
 
-const getConteudo = (dias: number, theme: MD3Theme): ReactNode => {
+const Conteudo = ({ objetivo }: { objetivo: Objetivo }) => {
+  const theme = useTheme();
+  const { today } = useDate();
+  const dias = daysBetween(objetivo.fim, today);
+
   switch (dias) {
     case 0:
       return <Text variant="headlineMedium">Volte amanhã</Text>;
@@ -79,55 +79,28 @@ const getConteudo = (dias: number, theme: MD3Theme): ReactNode => {
 
 const ObjetivosUpdate = () => {
   const { objetivoId } = useLocalSearchParams();
-  const { getObjetivo, fetchObjetivos } = useObjetivos();
-  const theme = useTheme();
-  const [today, setToday] = useState<Date | undefined | null>();
-  const getToday = useCallback(() => {
-    axiosInstance.utils.today().then(setToday);
-  }, [setToday]);
-
-  useEffect(() => {
-    getToday();
-  }, [getToday]);
-
-  const objetivo = getObjetivo(objetivoId as string);
+  const { get, fetch } = useObjetivos();
+  const objetivo = get(objetivoId as string);
 
   if (!objetivo) {
-    return (
-      <ErrorComponent
-        reload={fetchObjetivos}
-        message="Qual é o meu objetivo???"
-      />
-    );
+    return <ErrorComponent reload={fetch} message="Qual é o meu objetivo???" />;
   }
 
-  if (today === undefined) {
-    return <LoadingComponent />;
-  }
-
-  if (today === null) {
-    return (
-      <ErrorComponent reload={getToday} message="Não sei que dia é hoje ;-;" />
-    );
-  }
-
-  const daysBetweenFimHoje = daysBetween(objetivo.fim, today);
   const daysBetweenInicioFim = daysBetween(objetivo.inicio, objetivo.fim);
 
-  if (today)
-    return (
-      <SafeAreaView style={styles.main}>
-        <View style={styles.contadorContainer}>
-          <ContadorComponent
-            value={daysBetweenInicioFim}
-            style={styles.contador}
-          />
-          <Text variant="headlineLarge">Dias</Text>
-        </View>
+  return (
+    <SafeAreaView style={styles.main}>
+      <View style={styles.contadorContainer}>
+        <ContadorComponent
+          value={daysBetweenInicioFim}
+          style={styles.contador}
+        />
+        <Text variant="headlineLarge">Dias</Text>
+      </View>
 
-        {getConteudo(daysBetweenFimHoje, theme)}
-      </SafeAreaView>
-    );
+      <Conteudo objetivo={objetivo} />
+    </SafeAreaView>
+  );
 };
 
 export default ObjetivosUpdate;

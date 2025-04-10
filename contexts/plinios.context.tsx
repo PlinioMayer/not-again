@@ -1,4 +1,3 @@
-import { ErrorComponent, LoadingComponent } from "@/components";
 import { Plinio } from "@/types";
 import { axiosInstance } from "@/utils";
 import {
@@ -11,57 +10,28 @@ import {
 } from "react";
 
 export const PliniosContext = createContext<{
-  plinios: Plinio[];
-  fetchPlinios: () => Promise<Plinio | undefined>;
+  plinios?: Plinio[] | null;
+  fetch: () => Promise<void>;
 }>({
   plinios: [],
-  fetchPlinios: () => {
-    throw new Error("fetchPlinios não inicializado");
+  fetch: () => {
+    throw new Error("PliniosContext.fetch não inicializado");
   },
 });
 
 export const PliniosProvider = ({ children }: { children: ReactNode }) => {
   const [plinios, setPlinios] = useState<Plinio[] | undefined | null>();
-  const fetchPlinios = useCallback((): Promise<Plinio | undefined> => {
-    if (!plinios) {
-      throw new Error("Plinios não inicializados");
-    }
-
-    return axiosInstance.plinios.get().then((novosPlinios) => {
-      if (!novosPlinios) {
-        setPlinios(null);
-        return undefined;
-      }
-
-      setPlinios(plinios);
-
-      if (novosPlinios.length > plinios.length) {
-        return novosPlinios[0];
-      }
-
-      return undefined;
-    });
-  }, [plinios, setPlinios]);
+  const fetch = useCallback((): Promise<void> => {
+    setPlinios(undefined);
+    return axiosInstance.plinios.get().then(setPlinios);
+  }, [setPlinios]);
 
   useEffect(() => {
-    fetchPlinios();
-  }, [fetchPlinios]);
-
-  if (plinios === undefined) {
-    return <LoadingComponent />;
-  }
-
-  if (plinios === null) {
-    return (
-      <ErrorComponent
-        reload={fetchPlinios}
-        message="Onde estão meus Plínios???"
-      />
-    );
-  }
+    fetch();
+  }, [fetch]);
 
   return (
-    <PliniosContext.Provider value={{ plinios, fetchPlinios }}>
+    <PliniosContext.Provider value={{ plinios, fetch }}>
       {children}
     </PliniosContext.Provider>
   );

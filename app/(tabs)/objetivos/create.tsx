@@ -2,7 +2,12 @@ import { SafeAreaView, StyleSheet } from "react-native";
 import { Button, TextInput, Text, useTheme } from "react-native-paper";
 import { Controller, useForm } from "react-hook-form";
 import { ObjetivoForm } from "@/types";
-import { SpacerComponent } from "@/components";
+import { LoadingComponent, SpacerComponent } from "@/components";
+import { useCallback, useState } from "react";
+import { axiosInstance } from "@/utils";
+import { useError } from "@/contexts/error.context";
+import { router } from "expo-router";
+import { useObjetivos } from "@/contexts";
 
 const styles = StyleSheet.create({
   main: {
@@ -15,7 +20,10 @@ const styles = StyleSheet.create({
 });
 
 const ObjetivosCreate = () => {
+  const { fetch } = useObjetivos();
+  const { setError } = useError();
   const theme = useTheme();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const {
     control,
@@ -26,9 +34,31 @@ const ObjetivosCreate = () => {
       nome: "",
     },
   });
-  const onSubmit = (data: ObjetivoForm) => {
-    console.log(data);
-  };
+
+  const onSubmit = useCallback(
+    async (data: ObjetivoForm) => {
+      setLoading(true);
+      const res = await axiosInstance.objetivos.create({
+        nome: data.nome,
+        inicio: new Date(),
+        fim: new Date(),
+      });
+
+      if (!res) {
+        setError("Erro ao criar objetivo.");
+        setLoading(false);
+      } else {
+        await fetch();
+        setLoading(false);
+        router.back();
+      }
+    },
+    [setLoading, setError, fetch],
+  );
+
+  if (loading) {
+    return <LoadingComponent />;
+  }
 
   return (
     <SafeAreaView style={styles.main}>
@@ -43,7 +73,7 @@ const ObjetivosCreate = () => {
           <TextInput
             label="Nome"
             value={value}
-            onChange={onChange}
+            onChangeText={onChange}
             onBlur={onBlur}
           />
         )}

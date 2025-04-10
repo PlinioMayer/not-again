@@ -1,4 +1,3 @@
-import { ErrorComponent, LoadingComponent } from "@/components";
 import { Objetivo } from "@/types";
 import { axiosInstance } from "@/utils";
 import {
@@ -11,29 +10,35 @@ import {
 } from "react";
 
 export const ObjetivosContext = createContext<{
-  objetivos: Objetivo[];
-  getObjetivo: (id: string) => Objetivo | undefined;
-  fetchObjetivos: () => Promise<void>;
-  updateObjetivo: (id: string, data: Partial<Objetivo>) => Objetivo;
+  objetivos?: Objetivo[] | null;
+  get: (id: string) => Objetivo | undefined;
+  fetch: () => Promise<void>;
+  update: (id: string, data: Partial<Objetivo>) => Promise<boolean>;
+  delette: (id: string) => Promise<boolean>;
 }>({
-  objetivos: [],
-  getObjetivo: () => {
-    throw new Error("getObjetivo não inicializado");
+  get: () => {
+    throw new Error("ObjetivosContext.get não inicializado");
   },
-  fetchObjetivos: () => {
-    throw new Error("fetchObjetivos não inicializado");
+  fetch: () => {
+    throw new Error("ObjetivosContext.fetch não inicializado");
   },
-  updateObjetivo: () => {
-    throw new Error("updateObjetivo não inicializado");
+  update: () => {
+    throw new Error("ObjetivosContext.update não inicializado");
+  },
+  delette: () => {
+    throw new Error("ObjetivosContext.delette não inicializado");
   },
 });
 
 export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
   const [objetivos, setObjetivos] = useState<Objetivo[] | undefined | null>();
-  const fetchObjetivos = useCallback(() => {
+
+  const fetch = useCallback(() => {
+    setObjetivos(undefined);
     return axiosInstance.objetivos.get().then(setObjetivos);
   }, [setObjetivos]);
-  const getObjetivo = useCallback(
+
+  const get = useCallback(
     (id: string): Objetivo | undefined => {
       if (!objetivos) {
         throw new Error("Objetivos não inicializados");
@@ -43,13 +48,18 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
     },
     [objetivos],
   );
-  const updateObjetivo = useCallback(
-    (id: string, data: Partial<Objetivo>): Objetivo => {
+
+  const update = useCallback(
+    async (id: string, data: Partial<Objetivo>): Promise<boolean> => {
       if (!objetivos) {
         throw new Error("Objetivos não inicializados");
       }
 
-      const objetivo = getObjetivo(id);
+      if (!(await axiosInstance.objetivos.update(id, data))) {
+        return false;
+      }
+
+      const objetivo = get(id);
 
       if (!objetivo) {
         throw new Error(`Objetivo com id ${id} não encontrado`);
@@ -63,31 +73,43 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
 
       setObjetivos([...objetivos]);
 
-      return objetivo;
+      return true;
     },
-    [objetivos, getObjetivo],
+    [objetivos, get],
+  );
+
+  const delette = useCallback(
+    async (id: string): Promise<boolean> => {
+      if (!objetivos) {
+        throw new Error("Objetivos não inicializados");
+      }
+
+      if (!(await axiosInstance.objetivos.delete(id))) {
+        return false;
+      }
+
+      const index = objetivos.findIndex(
+        (objetivo) => objetivo.documentId === id,
+      );
+
+      if (index < 0) {
+        throw new Error(`Objetivo com id ${id} não encontrado`);
+      }
+
+      objetivos.splice(index, 1);
+      setObjetivos([...objetivos]);
+      return true;
+    },
+    [objetivos],
   );
 
   useEffect(() => {
-    fetchObjetivos();
-  }, [fetchObjetivos]);
-
-  if (objetivos === undefined) {
-    return <LoadingComponent />;
-  }
-
-  if (objetivos === null) {
-    return (
-      <ErrorComponent
-        reload={fetchObjetivos}
-        message="Quais são meus objetivos???"
-      />
-    );
-  }
+    fetch();
+  }, [fetch]);
 
   return (
     <ObjetivosContext.Provider
-      value={{ objetivos, fetchObjetivos, updateObjetivo, getObjetivo }}
+      value={{ objetivos, fetch, update, get, delette }}
     >
       {children}
     </ObjetivosContext.Provider>

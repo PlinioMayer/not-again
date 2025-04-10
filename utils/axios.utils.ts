@@ -1,9 +1,15 @@
 import { Objetivo, ObjetivoResponse, Plinio, PlinioResponse } from "@/types";
 import axios, { AxiosInstance } from "axios";
+import { format } from "./date.utils";
 
 export type CustomAxiosInstance = AxiosInstance & {
   objetivos: {
     get: () => Promise<Objetivo[] | null>;
+    create: (
+      objetivo: Omit<Objetivo, "criadoEm" | "plinio" | "documentId">,
+    ) => Promise<boolean>;
+    update: (id: string, data: Partial<Objetivo>) => Promise<boolean>;
+    delete: (id: string) => Promise<boolean>;
   };
   plinios: {
     get: () => Promise<Plinio[] | null>;
@@ -47,6 +53,63 @@ axiosInstance.objetivos = {
       return null;
     }
   },
+  create: async (
+    objetivo: Omit<Objetivo, "criadoEm" | "plinio" | "documentId">,
+  ): Promise<boolean> => {
+    try {
+      await axiosInstance.post(
+        process.env.EXPO_PUBLIC_CMS_HOST + "/api/objetivos",
+        {
+          data: {
+            ...objetivo,
+            inicio: format(objetivo.inicio),
+            fim: format(objetivo.fim),
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_CMS_TOKEN}`,
+          },
+        },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  update: async (id: string, data: Partial<Objetivo>): Promise<boolean> => {
+    try {
+      await axiosInstance.put(
+        `${process.env.EXPO_PUBLIC_CMS_HOST}/api/objetivos/${id}`,
+        {
+          data,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_CMS_TOKEN}`,
+          },
+        },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  delete: async (id: string): Promise<boolean> => {
+    try {
+      await axiosInstance.delete(
+        `${process.env.EXPO_PUBLIC_CMS_HOST}/api/objetivos/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_CMS_TOKEN}`,
+          },
+        },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  },
 };
 
 axiosInstance.plinios = {
@@ -58,6 +121,10 @@ axiosInstance.plinios = {
           params: {
             byObjetivo: true,
             sort: "dias:desc",
+            populate: "conteudo",
+          },
+          headers: {
+            Authorization: `Bearer ${process.env.EXPO_PUBLIC_CMS_TOKEN}`,
           },
         },
       );
