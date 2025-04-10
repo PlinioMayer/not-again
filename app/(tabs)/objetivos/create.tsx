@@ -38,7 +38,7 @@ const ObjetivosCreate = () => {
     async ({ nome }: ObjetivoForm) => {
       setLoading(true);
 
-      if (!create(nome)) {
+      if (!(await create(nome))) {
         setError("Erro ao criar objetivo.");
         setLoading(false);
       } else {
