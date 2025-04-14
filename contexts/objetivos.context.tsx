@@ -44,11 +44,7 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
 
   const get = useCallback(
     (id: string): Objetivo | undefined => {
-      if (!objetivos) {
-        throw new Error("Objetivos não inicializados");
-      }
-
-      return objetivos.find((objetivo) => objetivo.documentId === id);
+      return objetivos?.find((objetivo) => objetivo.documentId === id);
     },
     [objetivos],
   );

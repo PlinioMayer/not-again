@@ -7,7 +7,7 @@ import { useObjetivos } from "@/contexts/objetivos.context";
 import { Objetivo } from "@/types";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
+import { FlatList, SafeAreaView, StyleSheet } from "react-native";
 import { AnimatedFAB, Button, Dialog, Portal, Text } from "react-native-paper";
 
 const styles = StyleSheet.create({

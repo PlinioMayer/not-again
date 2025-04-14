@@ -1,9 +1,14 @@
-import { ContadorComponent, ErrorComponent } from "@/components";
-import { useDate } from "@/contexts";
+import {
+  ContadorComponent,
+  ErrorComponent,
+  LoadingComponent,
+} from "@/components";
+import { useDate, useError } from "@/contexts";
 import { useObjetivos } from "@/contexts/objetivos.context";
 import { Objetivo } from "@/types";
 import { daysBetween } from "@/utils/date.utils";
 import { useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
 
@@ -32,10 +37,43 @@ const styles = StyleSheet.create({
   },
 });
 
-const Conteudo = ({ objetivo }: { objetivo: Objetivo }) => {
+const Conteudo = ({
+  objetivo,
+  setLoading,
+}: {
+  objetivo: Objetivo;
+  setLoading: (loading: boolean) => void;
+}) => {
+  const { update } = useObjetivos();
   const theme = useTheme();
   const { today } = useDate();
   const dias = daysBetween(objetivo.fim, today);
+  const { setError } = useError();
+
+  const updateObjetivo = useCallback(async () => {
+    setLoading(true);
+    const res = await update(objetivo.documentId, { fim: today });
+    setLoading(false);
+
+    if (!res) {
+      setError("Erro ao atualizar objetivo.");
+      return;
+    }
+  }, [update, setLoading, setError, today, objetivo]);
+
+  const resetObjetivo = useCallback(async () => {
+    setLoading(true);
+    const res = await update(objetivo.documentId, {
+      inicio: today,
+      fim: today,
+    });
+    setLoading(false);
+
+    if (!res) {
+      setError("Erro ao atualizar objetivo.");
+      return;
+    }
+  }, [update, setLoading, setError, today, objetivo.documentId]);
 
   switch (dias) {
     case 0:
@@ -47,7 +85,11 @@ const Conteudo = ({ objetivo }: { objetivo: Objetivo }) => {
           <Text variant="headlineMedium">Mais um dia?</Text>
 
           <View style={styles.buttonsContainer}>
-            <Button mode="contained" buttonColor="#5cb85c">
+            <Button
+              mode="contained"
+              buttonColor="#5cb85c"
+              onPress={updateObjetivo}
+            >
               Sim
             </Button>
             <Button mode="contained" buttonColor={theme.colors.error}>
@@ -65,7 +107,11 @@ const Conteudo = ({ objetivo }: { objetivo: Objetivo }) => {
           </Text>
 
           <View style={styles.buttonsContainer}>
-            <Button mode="contained" buttonColor="#5cb85c">
+            <Button
+              mode="contained"
+              buttonColor="#5cb85c"
+              onPress={resetObjetivo}
+            >
               Sim
             </Button>
             <Button mode="contained" buttonColor={theme.colors.error}>
@@ -80,6 +126,11 @@ const Conteudo = ({ objetivo }: { objetivo: Objetivo }) => {
 const ObjetivosUpdate = () => {
   const { objetivoId } = useLocalSearchParams();
   const { get, fetch } = useObjetivos();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  if (loading) {
+    return <LoadingComponent />;
+  }
   const objetivo = get(objetivoId as string);
 
   if (!objetivo) {
@@ -98,7 +149,7 @@ const ObjetivosUpdate = () => {
         <Text variant="headlineLarge">Dias</Text>
       </View>
 
-      <Conteudo objetivo={objetivo} />
+      <Conteudo objetivo={objetivo} setLoading={setLoading} />
     </SafeAreaView>
   );
 };
