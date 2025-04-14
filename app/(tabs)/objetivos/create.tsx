@@ -6,7 +6,7 @@ import { LoadingComponent, SpacerComponent } from "@/components";
 import { useCallback, useState } from "react";
 import { useError } from "@/contexts/error.context";
 import { router } from "expo-router";
-import { useObjetivos } from "@/contexts";
+import { useObjetivos, usePlinio } from "@/contexts";
 
 const styles = StyleSheet.create({
   main: {
@@ -19,7 +19,8 @@ const styles = StyleSheet.create({
 });
 
 const ObjetivosCreate = () => {
-  const { create } = useObjetivos();
+  const { show } = usePlinio();
+  const { create, fetch } = useObjetivos();
   const { setError } = useError();
   const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
@@ -37,16 +38,25 @@ const ObjetivosCreate = () => {
   const onSubmit = useCallback(
     async ({ nome }: ObjetivoForm) => {
       setLoading(true);
+      const plinio = await create(nome);
 
-      if (!(await create(nome))) {
+      if (plinio === null) {
+        setLoading(false);
         setError("Erro ao criar objetivo.");
-        setLoading(false);
-      } else {
-        setLoading(false);
-        router.back();
+        return;
       }
+
+      await fetch();
+      setLoading(false);
+
+      if (plinio === undefined) {
+        router.back();
+        return;
+      }
+
+      show(plinio, router.back);
     },
-    [setLoading, setError, create],
+    [setLoading, setError, create, show, fetch],
   );
 
   if (loading) {

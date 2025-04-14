@@ -1,4 +1,4 @@
-import { Objetivo } from "@/types";
+import { Objetivo, Plinio } from "@/types";
 import { axiosInstance } from "@/utils";
 import {
   createContext,
@@ -13,8 +13,11 @@ export const ObjetivosContext = createContext<{
   objetivos?: Objetivo[] | null;
   get: (id: string) => Objetivo | undefined;
   fetch: () => Promise<void>;
-  create: (nome: string) => Promise<boolean>;
-  update: (id: string, data: Partial<Objetivo>) => Promise<boolean>;
+  create: (nome: string) => Promise<Plinio | undefined | null>;
+  update: (
+    id: string,
+    data: Partial<Objetivo>,
+  ) => Promise<Plinio | undefined | null>;
   delette: (id: string) => Promise<boolean>;
 }>({
   get: () => {
@@ -50,36 +53,28 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const create = useCallback(
-    async (nome: string): Promise<boolean> => {
+    async (nome: string): Promise<Plinio | undefined | null> => {
       const res = await axiosInstance.objetivos.create({
         nome: nome,
         inicio: new Date(),
         fim: new Date(),
       });
 
-      if (!res) {
-        return false;
-      }
-
-      await fetch();
-      return true;
+      return res;
     },
-    [fetch],
+    [],
   );
 
   const update = useCallback(
-    async (id: string, data: Partial<Objetivo>): Promise<boolean> => {
+    async (
+      id: string,
+      data: Partial<Objetivo>,
+    ): Promise<Plinio | undefined | null> => {
       const res = await axiosInstance.objetivos.update(id, data);
 
-      if (!res) {
-        return false;
-      }
-
-      await fetch();
-
-      return true;
+      return res;
     },
-    [fetch],
+    [],
   );
 
   const delette = useCallback(

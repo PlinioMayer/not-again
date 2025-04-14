@@ -1,4 +1,10 @@
-import { Objetivo, ObjetivoResponse, Plinio, PlinioResponse } from "@/types";
+import {
+  Objetivo,
+  ObjetivoResponse,
+  Plinio,
+  PlinioCollectionResponse,
+  PlinioSingleResponse,
+} from "@/types";
 import axios, { AxiosInstance } from "axios";
 import { format } from "./date.utils";
 
@@ -7,8 +13,11 @@ export type CustomAxiosInstance = AxiosInstance & {
     get: () => Promise<Objetivo[] | null>;
     create: (
       objetivo: Omit<Objetivo, "criadoEm" | "plinio" | "documentId">,
-    ) => Promise<boolean>;
-    update: (id: string, data: Partial<Objetivo>) => Promise<boolean>;
+    ) => Promise<Plinio | undefined | null>;
+    update: (
+      id: string,
+      data: Partial<Objetivo>,
+    ) => Promise<Plinio | undefined | null>;
     delete: (id: string) => Promise<boolean>;
   };
   plinios: {
@@ -55,9 +64,9 @@ axiosInstance.objetivos = {
   },
   create: async (
     objetivo: Omit<Objetivo, "criadoEm" | "plinio" | "documentId">,
-  ): Promise<boolean> => {
+  ): Promise<Plinio | undefined | null> => {
     try {
-      await axiosInstance.post(
+      const response = await axiosInstance.post<PlinioSingleResponse>(
         process.env.EXPO_PUBLIC_CMS_HOST + "/api/objetivos",
         {
           data: {
@@ -72,14 +81,26 @@ axiosInstance.objetivos = {
           },
         },
       );
-      return true;
+
+      if (!response.data.documentId) {
+        return undefined;
+      }
+
+      return {
+        documentId: response.data.documentId,
+        nome: response.data.nome,
+        url: process.env.EXPO_PUBLIC_CMS_HOST + response.data.conteudo[0].url,
+      };
     } catch {
-      return false;
+      return null;
     }
   },
-  update: async (id: string, data: Partial<Objetivo>): Promise<boolean> => {
+  update: async (
+    id: string,
+    data: Partial<Objetivo>,
+  ): Promise<Plinio | undefined | null> => {
     try {
-      await axiosInstance.put(
+      const response = await axiosInstance.put<PlinioSingleResponse>(
         `${process.env.EXPO_PUBLIC_CMS_HOST}/api/objetivos/${id}`,
         {
           data,
@@ -90,9 +111,17 @@ axiosInstance.objetivos = {
           },
         },
       );
-      return true;
+      if (!response.data.documentId) {
+        return undefined;
+      }
+
+      return {
+        documentId: response.data.documentId,
+        nome: response.data.nome,
+        url: process.env.EXPO_PUBLIC_CMS_HOST + response.data.conteudo[0].url,
+      };
     } catch {
-      return false;
+      return null;
     }
   },
   delete: async (id: string): Promise<boolean> => {
@@ -115,7 +144,7 @@ axiosInstance.objetivos = {
 axiosInstance.plinios = {
   get: async (): Promise<Plinio[] | null> => {
     try {
-      const plinios = await axiosInstance.get<PlinioResponse>(
+      const plinios = await axiosInstance.get<PlinioCollectionResponse>(
         process.env.EXPO_PUBLIC_CMS_HOST! + "/api/plinios",
         {
           params: {
