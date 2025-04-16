@@ -4,7 +4,7 @@ import { Text } from "react-native-paper";
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: "white",
+    backgroundColor: "#EFE8E1",
     borderRadius: 10,
     padding: 10,
     justifyContent: "space-between",
@@ -19,7 +19,26 @@ const styles = StyleSheet.create({
     borderColor: "black",
     borderRadius: 10,
     borderWidth: 1,
-    backgroundColor: "lightgrey",
+    backgroundColor: "#EBECEE",
+  },
+  back: {
+    backgroundColor: "#EFE8E1",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+  },
+  outerCircle: {
+    padding: 10,
+    borderRadius: "100%",
+    borderColor: "black",
+    borderWidth: 1,
+  },
+  innerCircle: {
+    padding: 50,
+    borderRadius: "100%",
+    borderColor: "black",
+    borderWidth: 1,
   },
 });
 
@@ -33,5 +52,15 @@ export const PlinioCardComponent = ({
   <View style={[styles.main, style]}>
     <Image source={{ uri: plinio?.url }} style={styles.image} />
     <Text variant="labelLarge">{plinio?.nome}</Text>
+  </View>
+);
+
+export const PlinioBackComponent = () => (
+  <View style={styles.back}>
+    <View style={styles.outerCircle}>
+      <View style={styles.innerCircle}>
+        <Text variant="titleLarge">PM</Text>
+      </View>
+    </View>
   </View>
 );
