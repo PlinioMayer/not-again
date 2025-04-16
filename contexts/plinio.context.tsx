@@ -1,3 +1,4 @@
+import { PlinioCardComponent } from "@/components";
 import { Plinio } from "@/types";
 import {
   createContext,
@@ -6,11 +7,11 @@ import {
   useContext,
   useState,
 } from "react";
-import { StyleSheet, Image, View } from "react-native";
-import { IconButton, Modal, Portal, Text } from "react-native-paper";
+import { StyleSheet } from "react-native";
+import { IconButton, Modal, Portal } from "react-native-paper";
 
 export const PlinioContext = createContext<{
-  show: (plinio: Plinio, callback: () => void) => void;
+  show: (plinio: Plinio, callback?: () => void) => void;
   clear: () => void;
 }>({
   show: () => {
@@ -27,33 +28,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  main: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    height: "80%",
+  plinioCard: {
     width: "80%",
-    padding: 10,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flex: 1,
-    gap: 10,
   },
-  image: {
-    flex: 1,
-    resizeMode: "contain",
-    width: "100%",
-    borderColor: "black",
-    borderRadius: 10,
-    borderWidth: 1,
-    backgroundColor: "lightgrey",
-  },
-  icon: {},
 });
 export const PlinioProvider = ({ children }: { children: ReactNode }) => {
   const [plinio, setPlinio] = useState<Plinio | undefined>();
   const [callback, setCallback] = useState<() => void>();
   const show = useCallback(
-    (plinio: Plinio, callback: () => void) => {
+    (plinio: Plinio, callback?: () => void) => {
       setPlinio(plinio);
       setCallback(() => callback);
     },
@@ -74,13 +57,9 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
           onDismiss={clear}
           contentContainerStyle={styles.container}
         >
-          <View style={styles.main}>
-            <Image source={{ uri: plinio?.url }} style={styles.image} />
-            <Text variant="labelLarge">{plinio?.nome}</Text>
-          </View>
+          <PlinioCardComponent style={styles.plinioCard} plinio={plinio} />
           <IconButton
             icon="close-circle-outline"
-            style={styles.icon}
             onPress={clear}
             iconColor="black"
             size={30}
