@@ -44,7 +44,7 @@ const Conteudo = ({
   objetivo: Objetivo;
   setLoading: (loading: boolean) => void;
 }) => {
-  const { update } = useObjetivos();
+  const { update, fetch } = useObjetivos();
   const theme = useTheme();
   const { today } = useDate();
   const dias = daysBetween(objetivo.fim, today);
@@ -52,14 +52,17 @@ const Conteudo = ({
 
   const updateObjetivo = useCallback(async () => {
     setLoading(true);
-    const res = await update(objetivo.documentId, { fim: today });
-    setLoading(false);
+    const res = await update(objetivo.documentId, { fim: "today" });
 
     if (!res) {
+      setLoading(false);
       setError("Erro ao atualizar objetivo.");
       return;
     }
-  }, [update, setLoading, setError, today, objetivo]);
+
+    await fetch();
+    setLoading(false);
+  }, [update, setLoading, setError, fetch, objetivo]);
 
   const resetObjetivo = useCallback(async () => {
     setLoading(true);

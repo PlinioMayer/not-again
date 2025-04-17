@@ -2,6 +2,7 @@ import {
   ErrorComponent,
   LoadingComponent,
   PlinioCardComponent,
+  SpacerComponent,
 } from "@/components";
 import { usePlinio } from "@/contexts";
 import { Plinio } from "@/types";
@@ -96,7 +97,7 @@ const Plinios = () => {
             >
               <PlinioCardComponent plinio={item[0]} />
             </TouchableRipple>
-            {item[1] && (
+            {item[1] ? (
               <TouchableRipple
                 style={styles.listItem}
                 onPress={() => {
@@ -105,6 +106,8 @@ const Plinios = () => {
               >
                 <PlinioCardComponent plinio={item[1]} />
               </TouchableRipple>
+            ) : (
+              <SpacerComponent />
             )}
           </View>
         )}

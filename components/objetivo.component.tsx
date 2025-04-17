@@ -1,12 +1,37 @@
+import { useDate } from "@/contexts";
 import { Objetivo } from "@/types";
 import { daysBetween } from "@/utils/date.utils";
 import { FC } from "react";
-import { Avatar, IconButton, List, useTheme } from "react-native-paper";
+import {
+  Avatar,
+  IconButton,
+  List,
+  MD3Theme,
+  useTheme,
+} from "react-native-paper";
 
 export type ObjetivoComponentProps = {
   objetivo: Objetivo;
   onPress: () => void;
   onDelete: () => void;
+};
+
+const getDescriptionColor = (
+  fim: Date,
+  today: Date,
+  theme: MD3Theme,
+): string => {
+  const days = daysBetween(fim, today);
+
+  if (days > 1) {
+    return theme.colors.error;
+  }
+
+  if (days === 0) {
+    return "#5cb85c";
+  }
+
+  return "black";
 };
 
 export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
@@ -19,11 +44,17 @@ export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
   onPress,
   onDelete,
 }) => {
+  const { today } = useDate();
   const theme = useTheme();
+  const days = daysBetween(inicio, fim);
+
   return (
     <List.Item
       title={nome}
-      description={`${daysBetween(inicio, fim).toString()} dias`}
+      descriptionStyle={{
+        color: getDescriptionColor(fim, today, theme),
+      }}
+      description={`${days} dia${days === 1 ? "" : "s"}`}
       onPress={onPress}
       left={({ style, ...props }) => (
         <Avatar.Image

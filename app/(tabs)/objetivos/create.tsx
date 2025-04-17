@@ -54,7 +54,11 @@ const ObjetivosCreate = () => {
         return;
       }
 
-      show(plinio, router.back);
+      show(plinio, {
+        animated: true,
+        callback: router.back,
+        title: "PARABÉNS!!!\nVOCÊ DESBLOQUEOU:",
+      });
     },
     [setLoading, setError, create, show, fetch],
   );

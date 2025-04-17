@@ -16,7 +16,7 @@ export type CustomAxiosInstance = AxiosInstance & {
     ) => Promise<Plinio | undefined | null>;
     update: (
       id: string,
-      data: Partial<Objetivo>,
+      data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
     ) => Promise<Plinio | undefined | null>;
     delete: (id: string) => Promise<boolean>;
   };
@@ -97,7 +97,7 @@ axiosInstance.objetivos = {
   },
   update: async (
     id: string,
-    data: Partial<Objetivo>,
+    data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
   ): Promise<Plinio | undefined | null> => {
     try {
       const response = await axiosInstance.put<PlinioSingleResponse>(

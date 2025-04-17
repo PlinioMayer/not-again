@@ -16,7 +16,7 @@ export const ObjetivosContext = createContext<{
   create: (nome: string) => Promise<Plinio | undefined | null>;
   update: (
     id: string,
-    data: Partial<Objetivo>,
+    data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
   ) => Promise<Plinio | undefined | null>;
   delette: (id: string) => Promise<boolean>;
 }>({
@@ -68,7 +68,7 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
   const update = useCallback(
     async (
       id: string,
-      data: Partial<Objetivo>,
+      data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
     ): Promise<Plinio | undefined | null> => {
       const res = await axiosInstance.objetivos.update(id, data);
 

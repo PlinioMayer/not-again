@@ -3,6 +3,7 @@ import {
   LoadingComponent,
   ObjetivoComponent,
 } from "@/components";
+import { useDate } from "@/contexts";
 import { useObjetivos } from "@/contexts/objetivos.context";
 import { Objetivo } from "@/types";
 import { useRouter } from "expo-router";
@@ -30,9 +31,15 @@ const styles = StyleSheet.create({
 });
 
 const Objetivos = () => {
+  const { fetch: fetchDate } = useDate();
   const router = useRouter();
-  const { objetivos, fetch, delette } = useObjetivos();
+  const { objetivos, fetch: fetchObjetivos, delette } = useObjetivos();
   const [deletable, setDeletable] = useState<Objetivo | undefined>();
+
+  const fetch = useCallback(() => {
+    fetchDate();
+    fetchObjetivos();
+  }, [fetchDate, fetchObjetivos]);
 
   const clearDeletable = useCallback(() => {
     setDeletable(undefined);

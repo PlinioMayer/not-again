@@ -11,17 +11,23 @@ import {
 
 export const DateContext = createContext<{
   today: Date;
-}>({ today: new Date() });
+  fetch: () => void;
+}>({
+  today: new Date(),
+  fetch: () => {
+    throw new Error("DateContext.fetch não inicializado");
+  },
+});
 
 export const DateProvider = ({ children }: { children: ReactNode }) => {
   const [today, setToday] = useState<Date | undefined | null>();
-  const fetchToday = useCallback(() => {
+  const fetch = useCallback(() => {
     axiosInstance.utils.today().then(setToday);
   }, [setToday]);
 
   useEffect(() => {
-    fetchToday();
-  }, [fetchToday]);
+    fetch();
+  }, [fetch]);
 
   if (today === undefined) {
     return <LoadingComponent />;
@@ -29,15 +35,14 @@ export const DateProvider = ({ children }: { children: ReactNode }) => {
 
   if (today === null) {
     return (
-      <ErrorComponent
-        reload={fetchToday}
-        message="Não sei que dia é hoje ;-;"
-      />
+      <ErrorComponent reload={fetch} message="Não sei que dia é hoje ;-;" />
     );
   }
 
   return (
-    <DateContext.Provider value={{ today }}>{children}</DateContext.Provider>
+    <DateContext.Provider value={{ today, fetch }}>
+      {children}
+    </DateContext.Provider>
   );
 };
 
