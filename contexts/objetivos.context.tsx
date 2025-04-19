@@ -1,4 +1,4 @@
-import { Objetivo, Plinio } from "@/types";
+import { CreateObjetivo, Objetivo, Plinio } from "@/types";
 import { axiosInstance } from "@/utils";
 import {
   createContext,
@@ -13,7 +13,7 @@ export const ObjetivosContext = createContext<{
   objetivos?: Objetivo[] | null;
   get: (id: string) => Objetivo | undefined;
   fetch: () => Promise<void>;
-  create: (nome: string) => Promise<Plinio | undefined | null>;
+  create: (nome: string) => Promise<CreateObjetivo | null>;
   update: (
     id: string,
     data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
@@ -53,7 +53,7 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const create = useCallback(
-    async (nome: string): Promise<Plinio | undefined | null> => {
+    async (nome: string): Promise<CreateObjetivo | null> => {
       const res = await axiosInstance.objetivos.create({
         nome: nome,
         inicio: new Date(),
@@ -77,19 +77,15 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
-  const delette = useCallback(
-    async (id: string): Promise<boolean> => {
-      const res = await axiosInstance.objetivos.delete(id);
+  const delette = useCallback(async (id: string): Promise<boolean> => {
+    const res = await axiosInstance.objetivos.delete(id);
 
-      if (!res) {
-        return false;
-      }
+    if (!res) {
+      return false;
+    }
 
-      await fetch();
-      return true;
-    },
-    [fetch],
-  );
+    return true;
+  }, []);
 
   useEffect(() => {
     fetch();

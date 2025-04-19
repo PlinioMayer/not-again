@@ -1,4 +1,5 @@
-import { ErrorComponent, LoadingComponent } from "@/components";
+import { ErrorComponent } from "@/components/error.component";
+import { LoadingComponent } from "@/components/loading.component";
 import { axiosInstance } from "@/utils";
 import {
   createContext,

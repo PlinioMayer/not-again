@@ -1,6 +1,8 @@
 import {
+  CreateObjetivo,
+  CreateObjetivoResponse,
   Objetivo,
-  ObjetivoResponse,
+  ObjetivoStrapiResponse,
   Plinio,
   PlinioCollectionResponse,
   PlinioSingleResponse,
@@ -13,7 +15,7 @@ export type CustomAxiosInstance = AxiosInstance & {
     get: () => Promise<Objetivo[] | null>;
     create: (
       objetivo: Omit<Objetivo, "criadoEm" | "plinio" | "documentId">,
-    ) => Promise<Plinio | undefined | null>;
+    ) => Promise<CreateObjetivo | null>;
     update: (
       id: string,
       data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
@@ -33,7 +35,7 @@ export const axiosInstance = axios.create() as CustomAxiosInstance;
 axiosInstance.objetivos = {
   get: async (): Promise<Objetivo[] | null> => {
     try {
-      const objetivos = await axiosInstance.get<ObjetivoResponse>(
+      const objetivos = await axiosInstance.get<ObjetivoStrapiResponse>(
         process.env.EXPO_PUBLIC_CMS_HOST! + "/api/objetivos",
         {
           params: {
@@ -64,9 +66,9 @@ axiosInstance.objetivos = {
   },
   create: async (
     objetivo: Omit<Objetivo, "criadoEm" | "plinio" | "documentId">,
-  ): Promise<Plinio | undefined | null> => {
+  ): Promise<CreateObjetivo | null> => {
     try {
-      const response = await axiosInstance.post<PlinioSingleResponse>(
+      const response = await axiosInstance.post<CreateObjetivoResponse>(
         process.env.EXPO_PUBLIC_CMS_HOST + "/api/objetivos",
         {
           data: {
@@ -81,16 +83,27 @@ axiosInstance.objetivos = {
           },
         },
       );
+      const result: CreateObjetivo = {
+        objetivo: {
+          documentId: response.data.objetivo.documentId,
+          nome: response.data.objetivo.nome,
+          inicio: new Date(response.data.objetivo.inicio),
+          fim: new Date(response.data.objetivo.fim),
+          criadoEm: new Date(response.data.objetivo.createdAt),
+        },
+      };
 
-      if (!response.data.documentId) {
-        return undefined;
+      if (response.data.plinio?.documentId) {
+        result.plinio = {
+          documentId: response.data.plinio!.documentId,
+          nome: response.data.plinio!.nome,
+          url:
+            process.env.EXPO_PUBLIC_CMS_HOST +
+            response.data.plinio!.conteudo[0].url,
+        };
       }
 
-      return {
-        documentId: response.data.documentId,
-        nome: response.data.nome,
-        url: process.env.EXPO_PUBLIC_CMS_HOST + response.data.conteudo[0].url,
-      };
+      return result;
     } catch {
       return null;
     }

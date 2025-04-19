@@ -45,10 +45,10 @@ const Objetivos = () => {
     setDeletable(undefined);
   }, [setDeletable]);
 
-  const onDelete = useCallback(() => {
-    delette(deletable!.documentId);
+  const onDelete = useCallback(async () => {
+    await delette(deletable!.documentId);
     clearDeletable();
-    fetch();
+    await fetch();
   }, [deletable, clearDeletable, fetch, delette]);
 
   if (objetivos === undefined) {

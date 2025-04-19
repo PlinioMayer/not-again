@@ -1,4 +1,7 @@
-import { PlinioBackComponent, PlinioCardComponent } from "@/components";
+import {
+  PlinioBackComponent,
+  PlinioCardComponent,
+} from "@/components/plinio-card.component";
 import { Plinio } from "@/types";
 import {
   createContext,
@@ -121,7 +124,7 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
     if (plinio) {
       transform.value = withSequence(
         withTiming(1080, {
-          duration: 2500,
+          duration: 2000,
           easing: Easing.out(Easing.ease),
         }),
       );

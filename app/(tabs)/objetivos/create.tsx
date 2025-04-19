@@ -38,9 +38,10 @@ const ObjetivosCreate = () => {
   const onSubmit = useCallback(
     async ({ nome }: ObjetivoForm) => {
       setLoading(true);
-      const plinio = await create(nome);
+      const created = await create(nome);
+      console.log(created);
 
-      if (plinio === null) {
+      if (created === null) {
         setLoading(false);
         setError("Erro ao criar objetivo.");
         return;
@@ -49,12 +50,12 @@ const ObjetivosCreate = () => {
       await fetch();
       setLoading(false);
 
-      if (plinio === undefined) {
+      if (created.plinio === undefined) {
         router.back();
         return;
       }
 
-      show(plinio, {
+      show(created.plinio, {
         animated: true,
         callback: router.back,
         title: "PARABÉNS!!!\nVOCÊ DESBLOQUEOU:",

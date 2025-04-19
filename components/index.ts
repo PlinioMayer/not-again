@@ -3,4 +3,4 @@ export * from "./error.component";
 export * from "./loading.component";
 export * from "./objetivo.component";
 export * from "./spacer.component";
-export * from "./plinio-card.compontent";
+export * from "./plinio-card.component";

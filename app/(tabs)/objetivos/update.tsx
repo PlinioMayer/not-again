@@ -3,14 +3,19 @@ import {
   ErrorComponent,
   LoadingComponent,
 } from "@/components";
-import { useDate, useError } from "@/contexts";
+import { useDate, useError, usePlinio } from "@/contexts";
 import { useObjetivos } from "@/contexts/objetivos.context";
-import { Objetivo } from "@/types";
+import { Objetivo, Plinio } from "@/types";
 import { daysBetween } from "@/utils/date.utils";
-import { useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
+import { useAudioPlayer } from "expo-audio";
+import { ConfettiComponent } from "@/components/confetti.component";
+
+const cheers = require("../../../assets/audio/cheers.mp3");
+const aww = require("../../../assets/audio/aww.mp3");
 
 const styles = StyleSheet.create({
   main: {
@@ -35,26 +40,39 @@ const styles = StyleSheet.create({
   perdidoHeadline: {
     textAlign: "center",
   },
+  confetti: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
 });
 
 const Conteudo = ({
   objetivo,
   setLoading,
+  setSucesso,
+  setPlinio,
 }: {
   objetivo: Objetivo;
   setLoading: (loading: boolean) => void;
+  setSucesso: (sucesso: boolean) => void;
+  setPlinio: (plinio: Plinio | undefined) => void;
 }) => {
-  const { update, fetch } = useObjetivos();
+  const { update, fetch, delette, create } = useObjetivos();
   const theme = useTheme();
   const { today } = useDate();
   const dias = daysBetween(objetivo.fim, today);
   const { setError } = useError();
+  const awwPlayer = useAudioPlayer(aww);
+  const router = useRouter();
 
   const updateObjetivo = useCallback(async () => {
     setLoading(true);
     const res = await update(objetivo.documentId, { fim: "today" });
 
-    if (!res) {
+    if (res === null) {
       setLoading(false);
       setError("Erro ao atualizar objetivo.");
       return;
@@ -62,21 +80,43 @@ const Conteudo = ({
 
     await fetch();
     setLoading(false);
-  }, [update, setLoading, setError, fetch, objetivo]);
+
+    setSucesso(true);
+    setPlinio(res);
+  }, [update, setLoading, setError, fetch, objetivo, setSucesso, setPlinio]);
 
   const resetObjetivo = useCallback(async () => {
+    const message = "Erro ao resetar objetivo.";
     setLoading(true);
-    const res = await update(objetivo.documentId, {
-      inicio: today,
-      fim: today,
-    });
-    setLoading(false);
+    const deleted = await delette(objetivo.documentId);
 
-    if (!res) {
-      setError("Erro ao atualizar objetivo.");
+    if (!deleted) {
+      setError(message);
       return;
     }
-  }, [update, setLoading, setError, today, objetivo.documentId]);
+
+    const created = await create(objetivo.nome);
+
+    if (created === null) {
+      setError(message);
+      return;
+    }
+
+    await fetch();
+    setLoading(false);
+    router.navigate(
+      `/objetivos/update?objetivoId=${created.objetivo.documentId}`,
+    );
+  }, [
+    setLoading,
+    setError,
+    objetivo.documentId,
+    objetivo.nome,
+    fetch,
+    delette,
+    create,
+    router,
+  ]);
 
   switch (dias) {
     case 0:
@@ -95,7 +135,11 @@ const Conteudo = ({
             >
               Sim
             </Button>
-            <Button mode="contained" buttonColor={theme.colors.error}>
+            <Button
+              onPress={() => awwPlayer.play()}
+              mode="contained"
+              buttonColor={theme.colors.error}
+            >
               Não
             </Button>
           </View>
@@ -117,7 +161,11 @@ const Conteudo = ({
             >
               Sim
             </Button>
-            <Button mode="contained" buttonColor={theme.colors.error}>
+            <Button
+              onPress={() => awwPlayer.play()}
+              mode="contained"
+              buttonColor={theme.colors.error}
+            >
               Não
             </Button>
           </View>
@@ -127,14 +175,36 @@ const Conteudo = ({
 };
 
 const ObjetivosUpdate = () => {
+  const cheersPlayer = useAudioPlayer(cheers);
   const { objetivoId } = useLocalSearchParams();
   const { get, fetch } = useObjetivos();
   const [loading, setLoading] = useState<boolean>(false);
+  const [sucesso, setSucesso] = useState<boolean>(false);
+  const [plinio, setPlinio] = useState<Plinio | undefined>();
+  const { show, clear } = usePlinio();
+
+  const objetivo = get(objetivoId as string);
+
+  useEffect(() => {
+    if (sucesso) {
+      cheersPlayer.play();
+    }
+  }, [sucesso, cheersPlayer]);
+
+  useEffect(() => {
+    if (plinio) {
+      show(plinio, {
+        animated: true,
+        title: "PARABÉNS!!!\nVOCÊ DESBLOQUEOU:",
+      });
+    } else {
+      clear();
+    }
+  }, [plinio, show, clear]);
 
   if (loading) {
     return <LoadingComponent />;
   }
-  const objetivo = get(objetivoId as string);
 
   if (!objetivo) {
     return <ErrorComponent reload={fetch} message="Qual é o meu objetivo???" />;
@@ -144,6 +214,7 @@ const ObjetivosUpdate = () => {
 
   return (
     <SafeAreaView style={styles.main}>
+      <ConfettiComponent show={sucesso} style={styles.confetti} />
       <View style={styles.contadorContainer}>
         <ContadorComponent
           value={daysBetweenInicioFim}
@@ -152,7 +223,12 @@ const ObjetivosUpdate = () => {
         <Text variant="headlineLarge">Dias</Text>
       </View>
 
-      <Conteudo objetivo={objetivo} setLoading={setLoading} />
+      <Conteudo
+        objetivo={objetivo}
+        setSucesso={setSucesso}
+        setLoading={setLoading}
+        setPlinio={setPlinio}
+      />
     </SafeAreaView>
   );
 };
