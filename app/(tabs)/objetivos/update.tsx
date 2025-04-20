@@ -11,7 +11,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
-import { useAudioPlayer } from "expo-audio";
 import { ConfettiComponent } from "@/components/confetti.component";
 
 const cheers = require("../../../assets/audio/cheers.mp3");
@@ -65,7 +64,6 @@ const Conteudo = ({
   const { today } = useDate();
   const dias = daysBetween(objetivo.fim, today);
   const { setError } = useError();
-  const awwPlayer = useAudioPlayer(aww);
   const router = useRouter();
 
   const updateObjetivo = useCallback(async () => {
@@ -135,11 +133,7 @@ const Conteudo = ({
             >
               Sim
             </Button>
-            <Button
-              onPress={() => awwPlayer.play()}
-              mode="contained"
-              buttonColor={theme.colors.error}
-            >
+            <Button mode="contained" buttonColor={theme.colors.error}>
               Não
             </Button>
           </View>
@@ -161,11 +155,7 @@ const Conteudo = ({
             >
               Sim
             </Button>
-            <Button
-              onPress={() => awwPlayer.play()}
-              mode="contained"
-              buttonColor={theme.colors.error}
-            >
+            <Button mode="contained" buttonColor={theme.colors.error}>
               Não
             </Button>
           </View>
@@ -175,7 +165,6 @@ const Conteudo = ({
 };
 
 const ObjetivosUpdate = () => {
-  const cheersPlayer = useAudioPlayer(cheers);
   const { objetivoId } = useLocalSearchParams();
   const { get, fetch } = useObjetivos();
   const [loading, setLoading] = useState<boolean>(false);
@@ -184,12 +173,6 @@ const ObjetivosUpdate = () => {
   const { show, clear } = usePlinio();
 
   const objetivo = get(objetivoId as string);
-
-  useEffect(() => {
-    if (sucesso) {
-      cheersPlayer.play();
-    }
-  }, [sucesso, cheersPlayer]);
 
   useEffect(() => {
     if (plinio) {

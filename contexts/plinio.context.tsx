@@ -20,15 +20,9 @@ import Animated, {
   Easing,
   withSequence,
 } from "react-native-reanimated";
-
-const isFront = (value: number): boolean => {
-  return (
-    value < 90 ||
-    (value > 270 && value < 450) ||
-    (value > 630 && value < 810) ||
-    (value > 990 && value <= 1080)
-  );
-};
+import { shareAsync } from "expo-sharing";
+import { cacheDirectory, downloadAsync } from "expo-file-system";
+import { useError } from "./error.context";
 
 type ShowPlinioConfig = {
   title?: string;
@@ -55,9 +49,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   animationContainer: {
-    flex: 1,
     width: "80%",
     position: "relative",
+    height: "60%",
   },
   plinioCard: {
     width: "80%",
@@ -68,6 +62,9 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
   },
+  buttonsContainer: {
+    flexDirection: "row",
+  },
 });
 
 export const PlinioProvider = ({ children }: { children: ReactNode }) => {
@@ -76,6 +73,7 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
   const [animated, setAnimated] = useState<boolean>(false);
   const [plinio, setPlinio] = useState<Plinio | undefined>();
   const [callback, setCallback] = useState<() => void>();
+  const { setError } = useError();
   const show = useCallback(
     (plinio: Plinio, config?: ShowPlinioConfig) => {
       setCallback(() => config?.callback);
@@ -91,6 +89,17 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
       callback();
     }
   }, [setPlinio, callback]);
+  const share = useCallback(async () => {
+    if (plinio) {
+      try {
+        const downloadPath = `${cacheDirectory}${plinio.documentId}.png`;
+        const { uri } = await downloadAsync(plinio.url, downloadPath);
+        await shareAsync(uri, { mimeType: "image/png" });
+      } catch {
+        setError("Erro ao compartilhar Plínio.");
+      }
+    }
+  }, [plinio, setError]);
 
   const animatedStyleFront = useAnimatedStyle(() => {
     return {
@@ -100,7 +109,13 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
       bottom: 0,
       left: 0,
       transform: [{ rotateY: transform.value + "deg" }],
-      opacity: isFront(transform.value) ? 1 : 0,
+      opacity:
+        transform.value < 90 ||
+        (transform.value > 270 && transform.value < 450) ||
+        (transform.value > 630 && transform.value < 810) ||
+        (transform.value > 990 && transform.value <= 1080)
+          ? 1
+          : 0,
     };
   });
 
@@ -112,7 +127,13 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
       bottom: 0,
       left: 0,
       transform: [{ rotateY: transform.value + 180 + "deg" }],
-      opacity: isFront(transform.value) ? 0 : 1,
+      opacity:
+        transform.value < 90 ||
+        (transform.value > 270 && transform.value < 450) ||
+        (transform.value > 630 && transform.value < 810) ||
+        (transform.value > 990 && transform.value <= 1080)
+          ? 0
+          : 1,
     };
   });
 
@@ -156,12 +177,21 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
             </Animated.View>
           </View>
 
-          <IconButton
-            icon="close-circle-outline"
-            onPress={clear}
-            iconColor="black"
-            size={30}
-          />
+          <View style={styles.buttonsContainer}>
+            <IconButton
+              icon="share-variant"
+              onPress={share}
+              iconColor="black"
+              size={30}
+            />
+
+            <IconButton
+              icon="close-circle-outline"
+              onPress={clear}
+              iconColor="black"
+              size={30}
+            />
+          </View>
         </Modal>
       </Portal>
       {children}
