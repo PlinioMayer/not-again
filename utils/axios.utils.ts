@@ -31,7 +31,7 @@ export type CustomAxiosInstance = AxiosInstance & {
 };
 
 export const axiosInstance = axios.create({
-  baseURL: process.env.CMS_HOST,
+  baseURL: process.env.EXPO_PUBLIC_CMS_HOST,
   headers: {
     Authorization: `Bearer ${process.env.CMS_TOKEN}`,
   },
@@ -58,7 +58,8 @@ axiosInstance.objetivos = {
         plinio: {
           documentId: objetivo.plinio.documentId,
           nome: objetivo.plinio.nome,
-          url: process.env.CMS_HOST + objetivo.plinio.conteudo[0].url,
+          url:
+            process.env.EXPO_PUBLIC_CMS_HOST + objetivo.plinio.conteudo[0].url,
         },
       }));
     } catch {
@@ -93,7 +94,9 @@ axiosInstance.objetivos = {
         result.plinio = {
           documentId: response.data.plinio!.documentId,
           nome: response.data.plinio!.nome,
-          url: process.env.CMS_HOST + response.data.plinio!.conteudo[0].url,
+          url:
+            process.env.EXPO_PUBLIC_CMS_HOST +
+            response.data.plinio!.conteudo[0].url,
         };
       }
 
@@ -120,7 +123,7 @@ axiosInstance.objetivos = {
       return {
         documentId: response.data.documentId,
         nome: response.data.nome,
-        url: process.env.CMS_HOST + response.data.conteudo[0].url,
+        url: process.env.EXPO_PUBLIC_CMS_HOST + response.data.conteudo[0].url,
       };
     } catch {
       return null;
@@ -128,7 +131,9 @@ axiosInstance.objetivos = {
   },
   delete: async (id: string): Promise<boolean> => {
     try {
-      await axiosInstance.delete(`${process.env.CMS_HOST}/api/objetivos/${id}`);
+      await axiosInstance.delete(
+        `${process.env.EXPO_PUBLIC_CMS_HOST}/api/objetivos/${id}`,
+      );
       return true;
     } catch {
       return false;
@@ -153,7 +158,7 @@ axiosInstance.plinios = {
       return plinios.data.data.map((plinio) => ({
         documentId: plinio.documentId,
         nome: plinio.nome,
-        url: process.env.CMS_HOST + plinio.conteudo[0].url,
+        url: process.env.EXPO_PUBLIC_CMS_HOST + plinio.conteudo[0].url,
       }));
     } catch {
       return null;
@@ -164,7 +169,7 @@ axiosInstance.plinios = {
 axiosInstance.utils = {
   today: (): Promise<Date | null> => {
     return axiosInstance
-      .get<string>(process.env.CMS_HOST! + "/api/utils/today")
+      .get<string>(process.env.EXPO_PUBLIC_CMS_HOST! + "/api/utils/today")
       .then((r) => new Date(r.data))
       .catch(() => null);
   },
