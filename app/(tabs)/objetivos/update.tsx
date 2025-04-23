@@ -11,10 +11,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
-import { ConfettiComponent } from "@/components/confetti.component";
-
-const cheers = require("../../../assets/audio/cheers.mp3");
-const aww = require("../../../assets/audio/aww.mp3");
 
 const styles = StyleSheet.create({
   main: {
@@ -51,12 +47,10 @@ const styles = StyleSheet.create({
 const Conteudo = ({
   objetivo,
   setLoading,
-  setSucesso,
   setPlinio,
 }: {
   objetivo: Objetivo;
   setLoading: (loading: boolean) => void;
-  setSucesso: (sucesso: boolean) => void;
   setPlinio: (plinio: Plinio | undefined) => void;
 }) => {
   const { update, fetch, delette, create } = useObjetivos();
@@ -79,9 +73,8 @@ const Conteudo = ({
     await fetch();
     setLoading(false);
 
-    setSucesso(true);
     setPlinio(res);
-  }, [update, setLoading, setError, fetch, objetivo, setSucesso, setPlinio]);
+  }, [update, setLoading, setError, fetch, objetivo, setPlinio]);
 
   const resetObjetivo = useCallback(async () => {
     const message = "Erro ao resetar objetivo.";
@@ -168,7 +161,6 @@ const ObjetivosUpdate = () => {
   const { objetivoId } = useLocalSearchParams();
   const { get, fetch } = useObjetivos();
   const [loading, setLoading] = useState<boolean>(false);
-  const [sucesso, setSucesso] = useState<boolean>(false);
   const [plinio, setPlinio] = useState<Plinio | undefined>();
   const { show, clear } = usePlinio();
 
@@ -197,7 +189,6 @@ const ObjetivosUpdate = () => {
 
   return (
     <SafeAreaView style={styles.main}>
-      <ConfettiComponent show={sucesso} style={styles.confetti} />
       <View style={styles.contadorContainer}>
         <ContadorComponent
           value={daysBetweenInicioFim}
@@ -208,7 +199,6 @@ const ObjetivosUpdate = () => {
 
       <Conteudo
         objetivo={objetivo}
-        setSucesso={setSucesso}
         setLoading={setLoading}
         setPlinio={setPlinio}
       />
