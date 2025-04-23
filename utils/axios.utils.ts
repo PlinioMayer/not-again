@@ -58,6 +58,7 @@ axiosInstance.objetivos = {
         plinio: {
           documentId: objetivo.plinio.documentId,
           nome: objetivo.plinio.nome,
+          dias: parseInt(objetivo.plinio.dias),
           url:
             process.env.EXPO_PUBLIC_CMS_HOST + objetivo.plinio.conteudo[0].url,
         },
@@ -94,6 +95,7 @@ axiosInstance.objetivos = {
         result.plinio = {
           documentId: response.data.plinio!.documentId,
           nome: response.data.plinio!.nome,
+          dias: parseInt(response.data.plinio.dias),
           url:
             process.env.EXPO_PUBLIC_CMS_HOST +
             response.data.plinio!.conteudo[0].url,
@@ -123,6 +125,7 @@ axiosInstance.objetivos = {
       return {
         documentId: response.data.documentId,
         nome: response.data.nome,
+        dias: parseInt(response.data.dias),
         url: process.env.EXPO_PUBLIC_CMS_HOST + response.data.conteudo[0].url,
       };
     } catch {
@@ -158,6 +161,7 @@ axiosInstance.plinios = {
       return plinios.data.data.map((plinio) => ({
         documentId: plinio.documentId,
         nome: plinio.nome,
+        dias: parseInt(plinio.dias),
         url: process.env.EXPO_PUBLIC_CMS_HOST + plinio.conteudo[0].url,
       }));
     } catch {

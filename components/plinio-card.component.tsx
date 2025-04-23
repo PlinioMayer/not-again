@@ -10,7 +10,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     flex: 1,
-    gap: 10,
   },
   image: {
     flex: 1,
@@ -20,6 +19,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     backgroundColor: "#EBECEE",
+    marginBottom: 10,
   },
   back: {
     backgroundColor: "#EFE8E1",
@@ -45,13 +45,16 @@ const styles = StyleSheet.create({
 export const PlinioCardComponent = ({
   plinio,
   style,
+  dias,
 }: {
   plinio?: Plinio;
+  dias?: boolean;
   style?: ViewStyle;
 }) => (
   <View style={[styles.main, style]}>
     <Image source={{ uri: plinio?.url }} style={styles.image} />
     <Text variant="labelLarge">{plinio?.nome}</Text>
+    {dias && <Text variant="labelMedium">{plinio?.dias} dias</Text>}
   </View>
 );
 

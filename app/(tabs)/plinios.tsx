@@ -95,7 +95,7 @@ const Plinios = () => {
                 show(item[0]);
               }}
             >
-              <PlinioCardComponent plinio={item[0]} />
+              <PlinioCardComponent plinio={item[0]} dias={true} />
             </TouchableRipple>
             {item[1] ? (
               <TouchableRipple
@@ -104,7 +104,7 @@ const Plinios = () => {
                   show(item[1]);
                 }}
               >
-                <PlinioCardComponent plinio={item[1]} />
+                <PlinioCardComponent plinio={item[1]} dias={true} />
               </TouchableRipple>
             ) : (
               <SpacerComponent />

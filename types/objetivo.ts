@@ -7,13 +7,7 @@ type ObjetivoResponse = {
   inicio: string;
   fim: string;
   createdAt: string;
-  plinio: {
-    documentId: string;
-    nome: string;
-    conteudo: {
-      url: string;
-    }[];
-  };
+  plinio: PlinioSingleResponse;
 };
 
 export type ObjetivoForm = {
