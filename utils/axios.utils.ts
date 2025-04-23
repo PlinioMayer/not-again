@@ -33,7 +33,7 @@ export type CustomAxiosInstance = AxiosInstance & {
 export const axiosInstance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_CMS_HOST,
   headers: {
-    Authorization: `Bearer ${process.env.CMS_TOKEN}`,
+    Authorization: `Bearer ${process.env.EXPO_PUBLIC_CMS_TOKEN}`,
   },
 }) as CustomAxiosInstance;
 
