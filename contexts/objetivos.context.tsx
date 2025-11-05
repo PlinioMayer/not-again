@@ -59,10 +59,16 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Nome repetido");
       }
 
+      const today = new Date();
+      today.setHours(0);
+      today.setMinutes(0);
+      today.setSeconds(0);
+      today.setMilliseconds(0);
+
       const objetivo = {
         nome,
-        inicio: new Date(),
-        fim: new Date(),
+        inicio: today,
+        fim: today,
       };
 
       const novosObjetivos = [...objetivos, objetivo];
@@ -120,7 +126,9 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
 
   const delette = useCallback(
     async (nome: string): Promise<boolean> => {
-      const index = objetivos!.findIndex((objetivo) => objetivo.nome === nome);
+      const index = objetivos!.findIndex(
+        (objetivo) => !objetivo.excluido && objetivo.nome === nome,
+      );
 
       if (index < 0) {
         return false;

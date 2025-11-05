@@ -13,7 +13,6 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     margin: 20,
-    gap: 50,
   },
   hint: {
     marginTop: 5,
@@ -87,7 +86,7 @@ const ObjetivosCreate = () => {
           required: { message: "Valor obrigatório", value: true },
         }}
         render={({ field: { onChange, onBlur, value } }) => (
-          <View>
+          <View style={{ marginTop: 50 }}>
             <DatePickerInput
               locale="pt"
               label="Início"
@@ -115,7 +114,7 @@ const ObjetivosCreate = () => {
           required: { message: "Valor obrigatório", value: true },
         }}
         render={({ field: { onChange, onBlur, value } }) => (
-          <View>
+          <View style={{ marginTop: 80 }}>
             <DatePickerInput
               locale="pt"
               label="Fim"

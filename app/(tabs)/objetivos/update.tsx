@@ -63,8 +63,13 @@ const Conteudo = ({
 
   const updateObjetivo = useCallback(async () => {
     setLoading(true);
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
     const res = await update(objetivo.nome, { fim: today });
     setPlinio(res);
+    setLoading(false);
   }, [update, setLoading, objetivo.nome, today, setPlinio]);
 
   const resetObjetivo = useCallback(async () => {

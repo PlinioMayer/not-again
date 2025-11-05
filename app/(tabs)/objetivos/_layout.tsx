@@ -1,61 +1,40 @@
+import { useSenhaDialog } from "@/contexts/senha-dialog.context";
 import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
-import { Button, Dialog, IconButton, Portal, Text } from "react-native-paper";
+import { IconButton } from "react-native-paper";
 
 const ObjetivosLayout = () => {
-  const [nome, setNome] = useState<string | undefined>();
+  const { show } = useSenhaDialog();
   const router = useRouter();
 
   return (
-    <>
-      <Portal>
-        <Dialog visible={!!nome} onDismiss={() => setNome(undefined)}>
-          <Dialog.Title>Você é o Plínio?</Dialog.Title>
-          <Dialog.Content>
-            <Text variant="bodyMedium">Senha</Text>
-          </Dialog.Content>
-          <Dialog.Actions style={{ justifyContent: "space-between" }}>
-            <Button
+    <Stack>
+      <Stack.Screen name="index" options={{ title: "Objetivos" }} />
+      <Stack.Screen name="create" options={{ title: "Novo objetivo" }} />
+      <Stack.Screen
+        name="update"
+        options={({ route }) => ({
+          title: (route.params as { nome: string }).nome,
+          headerRight: () => (
+            <IconButton
+              icon="pencil"
               onPress={() => {
-                setNome(undefined);
+                show(() => {
+                  router.push(
+                    `/objetivos/admin-update?nome=${(route.params as { nome: string }).nome}`,
+                  );
+                });
               }}
-            >
-              Não
-            </Button>
-            <Button
-              onPress={() => {
-                router.push(`/objetivos/admin-update?nome=${nome}`);
-                setNome(undefined);
-              }}
-            >
-              Sim
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-      <Stack>
-        <Stack.Screen name="index" options={{ title: "Objetivos" }} />
-        <Stack.Screen name="create" options={{ title: "Novo objetivo" }} />
-        <Stack.Screen
-          name="update"
-          options={({ route }) => ({
-            title: (route.params as { nome: string }).nome,
-            headerRight: () => (
-              <IconButton
-                icon="dots-vertical"
-                onPress={() => setNome((route.params as { nome: string }).nome)}
-              />
-            ),
-          })}
-        />
-        <Stack.Screen
-          name="admin-update"
-          options={({ route }) => ({
-            title: (route.params as { nome: string }).nome,
-          })}
-        />
-      </Stack>
-    </>
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="admin-update"
+        options={({ route }) => ({
+          title: (route.params as { nome: string }).nome,
+        })}
+      />
+    </Stack>
   );
 };
 

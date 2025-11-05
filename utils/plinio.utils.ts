@@ -102,9 +102,11 @@ const PLINIOS: Plinio[] = [
 ];
 
 export const getMaxPlinio = (objetivos: Objetivo[]): Plinio => {
-  const maxObjetivo = objetivos.sort(
-    (a, b) => daysBetween(b.inicio, b.fim) - daysBetween(a.inicio, a.fim),
-  )[0];
+  const maxObjetivo = objetivos
+    .slice(0)
+    .sort(
+      (a, b) => daysBetween(b.inicio, b.fim) - daysBetween(a.inicio, a.fim),
+    )[0];
 
   let plinio: Plinio = PLINIOS[0];
   for (const current of PLINIOS) {
@@ -120,11 +122,11 @@ export const getMaxPlinio = (objetivos: Objetivo[]): Plinio => {
 
 export const getAllPlinios = (objetivos: Objetivo[]): Plinio[] => {
   const plinios: Plinio[] = [];
-  const maxObjetivo = objetivos.sort(
-    (a, b) => daysBetween(b.inicio, b.fim) - daysBetween(a.inicio, a.fim),
-  )[0];
-
-  console.log(maxObjetivo);
+  const maxObjetivo = objetivos
+    .slice(0)
+    .sort(
+      (a, b) => daysBetween(b.inicio, b.fim) - daysBetween(a.inicio, a.fim),
+    )[0];
 
   if (!maxObjetivo) {
     return [];
