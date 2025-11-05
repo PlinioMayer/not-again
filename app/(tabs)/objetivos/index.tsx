@@ -3,13 +3,13 @@ import {
   LoadingComponent,
   ObjetivoComponent,
 } from "@/components";
-import { useDate } from "@/contexts";
 import { useObjetivos } from "@/contexts/objetivos.context";
 import { Objetivo } from "@/types";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, SafeAreaView, StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import { AnimatedFAB, Button, Dialog, Portal, Text } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   main: {
@@ -31,34 +31,26 @@ const styles = StyleSheet.create({
 });
 
 const Objetivos = () => {
-  const { fetch: fetchDate } = useDate();
   const router = useRouter();
-  const { objetivos, fetch: fetchObjetivos, delette } = useObjetivos();
+  const { objetivos, delette } = useObjetivos();
   const [deletable, setDeletable] = useState<Objetivo | undefined>();
-
-  const fetch = useCallback(() => {
-    fetchDate();
-    fetchObjetivos();
-  }, [fetchDate, fetchObjetivos]);
+  const objetivosFiltrados = objetivos.filter((objetivo) => !objetivo.excluido);
 
   const clearDeletable = useCallback(() => {
     setDeletable(undefined);
   }, [setDeletable]);
 
   const onDelete = useCallback(async () => {
-    await delette(deletable!.documentId);
+    await delette(deletable!.nome);
     clearDeletable();
-    await fetch();
-  }, [deletable, clearDeletable, fetch, delette]);
+  }, [deletable, clearDeletable, delette]);
 
   if (objetivos === undefined) {
     return <LoadingComponent />;
   }
 
   if (objetivos === null) {
-    return (
-      <ErrorComponent reload={fetch} message="Quais são meus objetivos???" />
-    );
+    return <ErrorComponent message="Quais são meus objetivos???" />;
   }
 
   return (
@@ -76,8 +68,10 @@ const Objetivos = () => {
         </Dialog>
       </Portal>
       <FlatList
-        contentContainerStyle={!objetivos.length ? styles.contentContainer : {}}
-        data={objetivos}
+        contentContainerStyle={
+          !objetivosFiltrados.length ? styles.contentContainer : {}
+        }
+        data={objetivosFiltrados.filter((objetivo) => !objetivo.excluido)}
         ListEmptyComponent={() => (
           <Text variant="headlineSmall" style={styles.emptyListText}>
             Adicione um objetivo para começar
@@ -87,13 +81,12 @@ const Objetivos = () => {
           <ObjetivoComponent
             onDelete={() => setDeletable(item)}
             onPress={() => {
-              router.push(`/objetivos/update?objetivoId=${item.documentId}`);
+              router.push(`/objetivos/update?nome=${item.nome}`);
             }}
             objetivo={item}
           />
         )}
-        keyExtractor={(item) => item.documentId}
-        onRefresh={fetch}
+        keyExtractor={(item) => item.nome}
         refreshing={objetivos === undefined}
       />
       <AnimatedFAB

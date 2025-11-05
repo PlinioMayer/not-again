@@ -4,12 +4,13 @@ import {
   PlinioCardComponent,
   SpacerComponent,
 } from "@/components";
-import { usePlinio } from "@/contexts";
+import { useObjetivos, usePlinio } from "@/contexts";
 import { Plinio } from "@/types";
-import { axiosInstance } from "@/utils";
+import { getAllPlinios } from "@/utils";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, SafeAreaView, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import { Text, TouchableRipple } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   main: {
@@ -47,21 +48,21 @@ const styles = StyleSheet.create({
 });
 
 const Plinios = () => {
+  const { objetivos } = useObjetivos();
   const { show } = usePlinio();
   const [plinios, setPlinios] = useState<Plinio[][] | undefined | null>();
   const fetch = useCallback(() => {
-    axiosInstance.plinios.get().then((plinios) => {
-      const temp: Plinio[][] = [];
-      plinios?.forEach((plinio, i) => {
-        if (i % 2) {
-          temp[Math.floor(i / 2)][1] = plinio;
-        } else {
-          temp[i / 2] = [plinio];
-        }
-      });
-      setPlinios(temp);
+    const temp: Plinio[][] = [];
+    getAllPlinios(objetivos).forEach((plinio, i) => {
+      if (i % 2) {
+        temp[Math.floor(i / 2)][1] = plinio;
+      } else {
+        temp[i / 2] = [plinio];
+      }
     });
-  }, [setPlinios]);
+
+    setPlinios(temp);
+  }, [setPlinios, objetivos]);
 
   useEffect(fetch, [fetch]);
 
@@ -111,7 +112,7 @@ const Plinios = () => {
             )}
           </View>
         )}
-        keyExtractor={(item) => item[0].documentId}
+        keyExtractor={(item) => item[0].nome}
         refreshing={plinios === undefined}
       />
     </SafeAreaView>

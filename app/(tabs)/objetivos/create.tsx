@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet } from "react-native";
+import { Alert, StyleSheet } from "react-native";
 import { Button, TextInput, Text, useTheme } from "react-native-paper";
 import { Controller, useForm } from "react-hook-form";
 import { ObjetivoForm } from "@/types";
@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 import { useError } from "@/contexts/error.context";
 import { router } from "expo-router";
 import { useObjetivos, usePlinio } from "@/contexts";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   main: {
@@ -20,7 +21,7 @@ const styles = StyleSheet.create({
 
 const ObjetivosCreate = () => {
   const { show } = usePlinio();
-  const { create, fetch } = useObjetivos();
+  const { create } = useObjetivos();
   const { setError } = useError();
   const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,30 +39,33 @@ const ObjetivosCreate = () => {
   const onSubmit = useCallback(
     async ({ nome }: ObjetivoForm) => {
       setLoading(true);
-      const created = await create(nome);
-      console.log(created);
+      try {
+        const created = await create(nome);
 
-      if (created === null) {
+        if (created === null) {
+          setLoading(false);
+          setError("Erro ao criar objetivo.");
+          return;
+        }
+
         setLoading(false);
-        setError("Erro ao criar objetivo.");
-        return;
+
+        if (created.plinio === undefined) {
+          router.back();
+          return;
+        }
+
+        show(created.plinio, {
+          animated: true,
+          callback: router.back,
+          title: "PARABÉNS!!!\nVOCÊ DESBLOQUEOU:",
+        });
+      } catch {
+        Alert.alert("Erro!", "Nome repetido");
+        setLoading(false);
       }
-
-      await fetch();
-      setLoading(false);
-
-      if (created.plinio === undefined) {
-        router.back();
-        return;
-      }
-
-      show(created.plinio, {
-        animated: true,
-        callback: router.back,
-        title: "PARABÉNS!!!\nVOCÊ DESBLOQUEOU:",
-      });
     },
-    [setLoading, setError, create, show, fetch],
+    [setLoading, setError, create, show],
   );
 
   if (loading) {

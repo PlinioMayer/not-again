@@ -1,5 +1,5 @@
-import { CreateObjetivo, Objetivo, Plinio } from "@/types";
-import { axiosInstance } from "@/utils";
+import { Objetivo, Plinio } from "@/types";
+import { getMaxPlinio } from "@/utils";
 import {
   createContext,
   ReactNode,
@@ -8,23 +8,23 @@ import {
   useEffect,
   useState,
 } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const OBJETIVOS_KEY = "OBJETIVOS";
 
 export const ObjetivosContext = createContext<{
-  objetivos?: Objetivo[] | null;
-  get: (id: string) => Objetivo | undefined;
-  fetch: () => Promise<void>;
-  create: (nome: string) => Promise<CreateObjetivo | null>;
+  objetivos: Objetivo[];
+  get: (nome: string) => Objetivo | undefined;
+  create: (nome: string) => Promise<Objetivo>;
   update: (
-    id: string,
-    data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
-  ) => Promise<Plinio | undefined | null>;
+    nome: string,
+    data: Partial<Objetivo>,
+  ) => Promise<Plinio | undefined>;
   delette: (id: string) => Promise<boolean>;
 }>({
+  objetivos: [],
   get: () => {
     throw new Error("ObjetivosContext.get não inicializado");
-  },
-  fetch: () => {
-    throw new Error("ObjetivosContext.fetch não inicializado");
   },
   create: () => {
     throw new Error("ObjetivosContext.create não inicializado");
@@ -38,62 +38,129 @@ export const ObjetivosContext = createContext<{
 });
 
 export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
-  const [objetivos, setObjetivos] = useState<Objetivo[] | undefined | null>();
-
-  const fetch = useCallback(() => {
-    setObjetivos(undefined);
-    return axiosInstance.objetivos.get().then(setObjetivos);
-  }, [setObjetivos]);
+  const [objetivos, setObjetivos] = useState<Objetivo[]>([]);
 
   const get = useCallback(
-    (id: string): Objetivo | undefined => {
-      return objetivos?.find((objetivo) => objetivo.documentId === id);
+    (nome: string): Objetivo | undefined => {
+      return objetivos?.find(
+        (objetivo) => !objetivo.excluido && objetivo.nome === nome,
+      );
     },
     [objetivos],
   );
 
   const create = useCallback(
-    async (nome: string): Promise<CreateObjetivo | null> => {
-      const res = await axiosInstance.objetivos.create({
-        nome: nome,
+    async (nome: string): Promise<Objetivo> => {
+      if (
+        objetivos?.find(
+          (objetivo) => !objetivo.excluido && objetivo.nome === nome,
+        )
+      ) {
+        throw new Error("Nome repetido");
+      }
+
+      const objetivo = {
+        nome,
         inicio: new Date(),
         fim: new Date(),
-      });
+      };
 
-      return res;
+      const novosObjetivos = [...objetivos, objetivo];
+
+      setObjetivos(novosObjetivos);
+      await AsyncStorage.setItem(OBJETIVOS_KEY, JSON.stringify(novosObjetivos));
+
+      return objetivo;
     },
-    [],
+    [setObjetivos, objetivos],
   );
 
   const update = useCallback(
     async (
-      id: string,
-      data: Omit<Partial<Objetivo>, "fim"> & { fim: Date | "today" },
-    ): Promise<Plinio | undefined | null> => {
-      const res = await axiosInstance.objetivos.update(id, data);
+      nome: string,
+      data: Partial<Objetivo>,
+    ): Promise<Plinio | undefined> => {
+      const index = objetivos.findIndex(
+        (objetivo) => !objetivo.excluido && objetivo.nome === nome,
+      );
 
-      return res;
+      if (
+        objetivos?.find(
+          (objetivo, i) =>
+            index !== i && !objetivo.excluido && objetivo.nome === nome,
+        )
+      ) {
+        throw new Error("Nome repetido");
+      }
+
+      if (index < 0) {
+        throw new Error("Objetivo não encontrado");
+      }
+
+      const initialMaxPlinio = getMaxPlinio(objetivos);
+
+      objetivos[index] = {
+        ...objetivos![index],
+        ...data,
+      };
+
+      const novosObjetivos = objetivos.slice(0);
+
+      setObjetivos(novosObjetivos);
+      await AsyncStorage.setItem(OBJETIVOS_KEY, JSON.stringify(novosObjetivos));
+
+      const currentMaxPlinio = getMaxPlinio(objetivos);
+
+      return initialMaxPlinio === currentMaxPlinio
+        ? undefined
+        : currentMaxPlinio;
     },
-    [],
+    [objetivos, setObjetivos],
   );
 
-  const delette = useCallback(async (id: string): Promise<boolean> => {
-    const res = await axiosInstance.objetivos.delete(id);
+  const delette = useCallback(
+    async (nome: string): Promise<boolean> => {
+      const index = objetivos!.findIndex((objetivo) => objetivo.nome === nome);
 
-    if (!res) {
-      return false;
-    }
+      if (index < 0) {
+        return false;
+      }
 
-    return true;
-  }, []);
+      objetivos[index] = {
+        ...objetivos[index],
+        excluido: new Date(),
+      };
+
+      const novosObjetivos = objetivos.slice(0);
+
+      setObjetivos(novosObjetivos);
+      await AsyncStorage.setItem(OBJETIVOS_KEY, JSON.stringify(novosObjetivos));
+
+      return true;
+    },
+    [objetivos, setObjetivos],
+  );
 
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    AsyncStorage.getItem(OBJETIVOS_KEY)
+      .then((value) => {
+        console.log(value);
+        return value ? JSON.parse(value) : [];
+      })
+      .then((objetivos) =>
+        objetivos.map((objetivo: Objetivo) => ({
+          ...objetivo,
+          inicio: new Date(objetivo.inicio),
+          fim: new Date(objetivo.fim),
+          excluido: objetivo.excluido ? new Date(objetivo.excluido) : undefined,
+        })),
+      )
+      .then(setObjetivos);
+  }, []);
 
   return (
     <ObjetivosContext.Provider
-      value={{ objetivos, fetch, create, update, get, delette }}
+      value={{ objetivos, create, update, get, delette }}
     >
       {children}
     </ObjetivosContext.Provider>

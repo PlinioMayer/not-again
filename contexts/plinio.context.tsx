@@ -21,7 +21,7 @@ import Animated, {
   withSequence,
 } from "react-native-reanimated";
 import { shareAsync } from "expo-sharing";
-import { cacheDirectory, downloadAsync } from "expo-file-system";
+import { cacheDirectory, downloadAsync } from "expo-file-system/legacy";
 import { useError } from "./error.context";
 
 type ShowPlinioConfig = {
@@ -74,6 +74,7 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
   const [plinio, setPlinio] = useState<Plinio | undefined>();
   const [callback, setCallback] = useState<() => void>();
   const { setError } = useError();
+
   const show = useCallback(
     (plinio: Plinio, config?: ShowPlinioConfig) => {
       setCallback(() => config?.callback);
@@ -83,17 +84,19 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
     },
     [setPlinio, setCallback],
   );
+
   const clear = useCallback(() => {
     setPlinio(undefined);
     if (callback) {
       callback();
     }
   }, [setPlinio, callback]);
+
   const share = useCallback(async () => {
     if (plinio) {
       try {
-        const downloadPath = `${cacheDirectory}${plinio.documentId}.png`;
-        const { uri } = await downloadAsync(plinio.url, downloadPath);
+        const downloadPath = `${cacheDirectory}${plinio.nome}.png`;
+        const { uri } = await downloadAsync(plinio.uri, downloadPath);
         await shareAsync(uri, { mimeType: "image/png" });
       } catch {
         setError("Erro ao compartilhar Plínio.");

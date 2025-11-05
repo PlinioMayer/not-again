@@ -1,5 +1,5 @@
-import { useDate } from "@/contexts";
 import { Objetivo } from "@/types";
+import { getPlinioFromObjetivo } from "@/utils";
 import { daysBetween } from "@/utils/date.utils";
 import { FC } from "react";
 import {
@@ -35,24 +35,19 @@ const getDescriptionColor = (
 };
 
 export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
-  objetivo: {
-    nome,
-    inicio,
-    fim,
-    plinio: { url },
-  },
+  objetivo,
   onPress,
   onDelete,
 }) => {
-  const { today } = useDate();
+  const today = new Date();
   const theme = useTheme();
-  const days = daysBetween(inicio, fim);
+  const days = daysBetween(objetivo.inicio, objetivo.fim);
 
   return (
     <List.Item
-      title={nome}
+      title={objetivo.nome}
       descriptionStyle={{
-        color: getDescriptionColor(fim, today, theme),
+        color: getDescriptionColor(objetivo.fim, today, theme),
       }}
       description={`${days} dia${days === 1 ? "" : "s"}`}
       onPress={onPress}
@@ -64,7 +59,7 @@ export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
             backgroundColor: theme.colors.elevation.level5,
           }}
           size={50}
-          source={{ uri: url }}
+          source={{ uri: getPlinioFromObjetivo(objetivo).uri }}
         />
       )}
       right={(props) => (

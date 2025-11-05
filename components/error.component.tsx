@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
 });
 
 export type ErrorComponentProps = {
-  reload: () => void;
+  reload?: () => void;
   message: string;
 };
 

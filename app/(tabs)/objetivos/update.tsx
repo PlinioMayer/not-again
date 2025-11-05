@@ -3,14 +3,15 @@ import {
   ErrorComponent,
   LoadingComponent,
 } from "@/components";
-import { useDate, useError, usePlinio } from "@/contexts";
+import { useError, usePlinio } from "@/contexts";
 import { useObjetivos } from "@/contexts/objetivos.context";
 import { Objetivo, Plinio } from "@/types";
 import { daysBetween } from "@/utils/date.utils";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
   main: {
@@ -53,33 +54,23 @@ const Conteudo = ({
   setLoading: (loading: boolean) => void;
   setPlinio: (plinio: Plinio | undefined) => void;
 }) => {
-  const { update, fetch, delette, create } = useObjetivos();
+  const { update, delette, create } = useObjetivos();
   const theme = useTheme();
-  const { today } = useDate();
+  const today = new Date();
   const dias = daysBetween(objetivo.fim, today);
   const { setError } = useError();
   const router = useRouter();
 
   const updateObjetivo = useCallback(async () => {
     setLoading(true);
-    const res = await update(objetivo.documentId, { fim: "today" });
-
-    if (res === null) {
-      setLoading(false);
-      setError("Erro ao atualizar objetivo.");
-      return;
-    }
-
-    await fetch();
-    setLoading(false);
-
+    const res = await update(objetivo.nome, { fim: today });
     setPlinio(res);
-  }, [update, setLoading, setError, fetch, objetivo, setPlinio]);
+  }, [update, setLoading, objetivo.nome, today, setPlinio]);
 
   const resetObjetivo = useCallback(async () => {
     const message = "Erro ao resetar objetivo.";
     setLoading(true);
-    const deleted = await delette(objetivo.documentId);
+    const deleted = await delette(objetivo.nome);
 
     if (!deleted) {
       setError(message);
@@ -87,27 +78,9 @@ const Conteudo = ({
     }
 
     const created = await create(objetivo.nome);
-
-    if (created === null) {
-      setError(message);
-      return;
-    }
-
-    await fetch();
     setLoading(false);
-    router.navigate(
-      `/objetivos/update?objetivoId=${created.objetivo.documentId}`,
-    );
-  }, [
-    setLoading,
-    setError,
-    objetivo.documentId,
-    objetivo.nome,
-    fetch,
-    delette,
-    create,
-    router,
-  ]);
+    router.navigate(`/objetivos/update?nome=${created.nome}`);
+  }, [setLoading, setError, objetivo.nome, delette, create, router]);
 
   switch (dias) {
     case 0:
@@ -158,13 +131,13 @@ const Conteudo = ({
 };
 
 const ObjetivosUpdate = () => {
-  const { objetivoId } = useLocalSearchParams();
-  const { get, fetch } = useObjetivos();
+  const { nome } = useLocalSearchParams();
+  const { get } = useObjetivos();
   const [loading, setLoading] = useState<boolean>(false);
   const [plinio, setPlinio] = useState<Plinio | undefined>();
   const { show, clear } = usePlinio();
 
-  const objetivo = get(objetivoId as string);
+  const objetivo = get(nome as string);
 
   useEffect(() => {
     if (plinio) {
@@ -182,7 +155,7 @@ const ObjetivosUpdate = () => {
   }
 
   if (!objetivo) {
-    return <ErrorComponent reload={fetch} message="Qual é o meu objetivo???" />;
+    return <ErrorComponent message="Qual é o meu objetivo???" />;
   }
 
   const daysBetweenInicioFim = daysBetween(objetivo.inicio, objetivo.fim);
