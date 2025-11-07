@@ -98,7 +98,9 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
   const share = useCallback(async () => {
     if (plinio) {
       try {
-        await shareAsync(assets![0].localUri!, { mimeType: "image/png" });
+        await shareAsync(assets![plinio.id].localUri!, {
+          mimeType: "image/png",
+        });
       } catch (e) {
         console.log(e);
         setError("Erro ao compartilhar Plínio.");
