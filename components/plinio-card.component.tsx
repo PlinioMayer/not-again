@@ -52,7 +52,7 @@ export const PlinioCardComponent = ({
   style?: ViewStyle;
 }) => (
   <View style={[styles.main, style]}>
-    <Image source={{ uri: plinio?.uri }} style={styles.image} />
+    <Image source={plinio?.uri} style={styles.image} />
     <Text variant="labelLarge">{plinio?.nome}</Text>
     {dias && <Text variant="labelMedium">{plinio?.dias} dias</Text>}
   </View>

@@ -151,10 +151,7 @@ export const ObjetivosProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     AsyncStorage.getItem(OBJETIVOS_KEY)
-      .then((value) => {
-        console.log(value);
-        return value ? JSON.parse(value) : [];
-      })
+      .then((value) => (value ? JSON.parse(value) : []))
       .then((objetivos) =>
         objetivos.map((objetivo: Objetivo) => ({
           ...objetivo,

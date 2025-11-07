@@ -59,7 +59,7 @@ export const ObjetivoComponent: FC<ObjetivoComponentProps> = ({
             backgroundColor: theme.colors.elevation.level5,
           }}
           size={50}
-          source={{ uri: getPlinioFromObjetivo(objetivo).uri }}
+          source={getPlinioFromObjetivo(objetivo).uri}
         />
       )}
       right={(props) => (

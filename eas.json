@@ -3,7 +3,11 @@
     "preview": {
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "preview"
     }
+  },
+  "cli": {
+    "appVersionSource": "remote"
   }
 }

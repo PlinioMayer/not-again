@@ -21,8 +21,10 @@ import Animated, {
   withSequence,
 } from "react-native-reanimated";
 import { shareAsync } from "expo-sharing";
-import { cacheDirectory, downloadAsync } from "expo-file-system/legacy";
+
 import { useError } from "./error.context";
+import { PLINIOS } from "@/utils";
+import { useAssets } from "expo-asset";
 
 type ShowPlinioConfig = {
   title?: string;
@@ -68,6 +70,7 @@ const styles = StyleSheet.create({
 });
 
 export const PlinioProvider = ({ children }: { children: ReactNode }) => {
+  const [assets] = useAssets(PLINIOS.map((plinio) => plinio.uri));
   const transform = useSharedValue(0);
   const [title, setTitle] = useState<string | undefined>();
   const [animated, setAnimated] = useState<boolean>(false);
@@ -95,14 +98,13 @@ export const PlinioProvider = ({ children }: { children: ReactNode }) => {
   const share = useCallback(async () => {
     if (plinio) {
       try {
-        const downloadPath = `${cacheDirectory}${plinio.nome}.png`;
-        const { uri } = await downloadAsync(plinio.uri, downloadPath);
-        await shareAsync(uri, { mimeType: "image/png" });
-      } catch {
+        await shareAsync(assets![0].localUri!, { mimeType: "image/png" });
+      } catch (e) {
+        console.log(e);
         setError("Erro ao compartilhar Plínio.");
       }
     }
-  }, [plinio, setError]);
+  }, [plinio, setError, assets]);
 
   const animatedStyleFront = useAnimatedStyle(() => {
     return {

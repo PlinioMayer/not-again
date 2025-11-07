@@ -1,102 +1,77 @@
 import { Objetivo, Plinio } from "@/types";
-import { Image } from "react-native";
 import { daysBetween } from "./date.utils";
 
-const PLINIOS: Plinio[] = [
+export const PLINIOS: Plinio[] = [
   {
-    id: require("@/assets/images/plinios/plinio_fetal.png"),
+    id: 0,
     nome: "Plínio Fetal",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_fetal.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_fetal.png"),
     dias: 0,
   },
   {
-    id: require("@/assets/images/plinios/plinio_magoado.png"),
+    id: 1,
     nome: "Plínio Magoado",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_magoado.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_magoado.png"),
     dias: 1,
   },
   {
-    id: require("@/assets/images/plinios/plinio_confiante.png"),
+    id: 2,
     nome: "Plínio Confiante",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_confiante.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_confiante.png"),
     dias: 3,
   },
   {
-    id: require("@/assets/images/plinios/plinio_esperancoso.png"),
+    id: 3,
     nome: "Plínio Esperançoso",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_esperancoso.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_esperancoso.png"),
     dias: 5,
   },
   {
-    id: require("@/assets/images/plinios/plinio_soninho.png"),
+    id: 4,
     nome: "Plínio Soninho",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_soninho.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_soninho.png"),
     dias: 7,
   },
   {
-    id: require("@/assets/images/plinios/plinio_filosofo.png"),
+    id: 5,
     nome: "Plínio Soninho",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_filosofo.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_filosofo.png"),
     dias: 14,
   },
   {
-    id: require("@/assets/images/plinios/plinio_maneiro.png"),
+    id: 6,
     nome: "Plínio Maneiro",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_maneiro.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_maneiro.png"),
     dias: 30,
   },
   {
-    id: require("@/assets/images/plinios/plinio_maromba.png"),
+    id: 7,
     nome: "Plínio Maromba",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_maromba.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_maromba.png"),
     dias: 60,
   },
   {
-    id: require("@/assets/images/plinios/plinio_espacial.png"),
+    id: 8,
     nome: "Plínio Espacial",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_espacial.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_espacial.png"),
     dias: 90,
   },
   {
-    id: require("@/assets/images/plinios/plinio_cangaceiro.png"),
+    id: 9,
     nome: "Plínio Cangaceiro",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_cangaceiro.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_cangaceiro.png"),
     dias: 120,
   },
   {
-    id: require("@/assets/images/plinios/plinio_bolsonarista.png"),
+    id: 10,
     nome: "Plínio Bolsonarista",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_bolsonarista.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_bolsonarista.png"),
     dias: 150,
   },
   {
-    id: require("@/assets/images/plinios/plinio_real.png"),
+    id: 11,
     nome: "Plínio Real",
-    uri: Image.resolveAssetSource(
-      require("@/assets/images/plinios/plinio_real.png"),
-    ).uri,
+    uri: require("@/assets/images/plinios/plinio_real.png"),
     dias: 180,
   },
 ];

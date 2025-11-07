@@ -1,6 +1,6 @@
 export type Plinio = {
   id: number;
   nome: string;
-  uri: string;
+  uri: number;
   dias: number;
 };

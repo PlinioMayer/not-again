@@ -1,4 +1,4 @@
-import { PaperProvider } from "react-native-paper";
+import { DefaultTheme, PaperProvider } from "react-native-paper";
 import { Stack } from "expo-router";
 import { ObjetivosProvider } from "@/contexts/objetivos.context";
 import { ErrorProvider } from "@/contexts/error.context";
@@ -11,7 +11,7 @@ import {
 export const AppLayout = () => {
   return (
     <ObjetivosProvider>
-      <PaperProvider>
+      <PaperProvider theme={DefaultTheme}>
         <ErrorProvider>
           <PlinioProvider>
             <SenhaDialogProvider>
